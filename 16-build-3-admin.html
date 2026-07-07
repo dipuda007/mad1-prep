@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Build 3: Admin Dashboard</title>
+<link rel="icon" type="image/png" href="icon.png">
+<link rel="stylesheet" href="style.css">
+<script>(function(){var t=localStorage.getItem("mad1-theme");if(location.hash==="#force-dark")t="dark";if(location.hash==="#force-light")t="light";if(t==="dark"||(!t&&window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches))document.documentElement.setAttribute("data-theme","dark");})();</script>
+<script src="app.js" defer></script>
+</head>
+<body>
+<div class="topnav"><a href="index.html">🏔️ Home</a></div>
+<div class="wrap">
+
+<h1>Build 3: Admin Dashboard &amp; Management</h1>
+<div class="warn" style="border-left-width:8px">
+<strong>⚠️ READ THIS BEFORE TYPING A SINGLE LINE:</strong> this lesson builds
+<strong>EventHub — a demo app</strong>. It is <strong>NOT the official MAD-1 project</strong>
+and NOT a submission-ready solution for any term. This code is AI-generated teaching material.
+Copy-pasting it (or any public code) into your MAD-1 submission is plagiarism — IITM's
+similarity checks WILL flag it and you can be <strong>disqualified (U grade)</strong>.
+Learn the pattern here, then write YOUR project's code yourself, line by line.
+</div>
+<p><strong>Milestone:</strong> stats dashboard, event CRUD, approve staff, assign staff to events,
+blacklist, search, view all bookings. Biggest build — worth 20% of the project.</p>
+
+<h2>1. Every admin route starts with the same guard</h2>
+<pre><code>user = current_user()
+if not user or user.role != 'admin':
+    return redirect(url_for('login'))</code></pre>
+<p>This is your <strong>authorization</strong> (Lesson 13). It repeats at the top of every
+admin/staff/user route on purpose: dead simple to explain, impossible to bypass.</p>
+
+<h2>2. Dashboard with counts</h2>
+<pre><code>@app.route('/admin')
+def admin_dashboard():
+    user = current_user()
+    if not user or user.role != 'admin':
+        return redirect(url_for('login'))
+
+    stats = {
+        'events': Event.query.count(),
+        'users': User.query.filter_by(role='user').count(),
+        'staff': User.query.filter_by(role='staff').count(),
+        'bookings': Booking.query.count(),
+    }
+    events = Event.query.all()
+    return render_template('admin_dashboard.html', stats=stats, events=events)</code></pre>
+<p><code>admin_dashboard.html</code> (copy from reference): four Bootstrap stat cards in a
+<code>row</code>/<code>col-md-3</code> grid reading <code>{{ stats.events }}</code> etc., a search
+box, and an events table where each row has Edit / Participants / Delete buttons.</p>
+
+<h2>3. Add + Edit event — ONE form template for both</h2>
+<p>Both routes render <code>event_form.html</code>; edit passes the existing event, add passes
+<code>event=None</code>, and the template pre-fills with
+<code>value="{{ event.name if event else '' }}"</code>. One template, two jobs — clean thing to show
+off in the viva.</p>
+<pre><code>@app.route('/admin/event/add', methods=['GET', 'POST'])
+def add_event():
+    user = current_user()
+    if not user or user.role != 'admin':
+        return redirect(url_for('login'))
+
+    if request.method == 'POST':
+        event = Event(name=request.form['name'],
+                    location=request.form['location'],
+                    category=request.form['category'],
+                    duration_hours=int(request.form['duration_hours']),
+                    available_slots=int(request.form['available_slots']),
+                    status=request.form['status'],
+                    start_date=request.form['start_date'],
+                    end_date=request.form['end_date'],
+                    staff_id=int(request.form['staff_id']) if request.form['staff_id'] else None)
+        db.session.add(event)
+        db.session.commit()
+        flash('Event created.')
+        return redirect(url_for('admin_dashboard'))
+
+    staff_list = User.query.filter_by(role='staff', approved=True, blacklisted=False).all()
+    return render_template('event_form.html', event=None, staff_list=staff_list)</code></pre>
+<p>Notice: <code>staff_list</code> fills the "Assign Staff" dropdown — only approved,
+non-blacklisted staff. That dropdown IS the "assign staff to events" requirement. The
+<code>if ... else None</code> handles "no staff yet" (NULL foreign key).</p>
+<p>Edit is the same shape — load with <code>get_or_404</code>, overwrite fields from the form,
+commit (no <code>db.session.add</code> needed — the object is already tracked):</p>
+<pre><code>@app.route('/admin/event/edit/&lt;int:event_id&gt;', methods=['GET', 'POST'])
+def edit_event(event_id):
+    user = current_user()
+    if not user or user.role != 'admin':
+        return redirect(url_for('login'))
+
+    event = Event.query.get_or_404(event_id)
+    if request.method == 'POST':
+        event.name = request.form['name']
+        event.location = request.form['location']
+        event.category = request.form['category']
+        event.duration_hours = int(request.form['duration_hours'])
+        event.available_slots = int(request.form['available_slots'])
+        event.status = request.form['status']
+        event.start_date = request.form['start_date']
+        event.end_date = request.form['end_date']
+        event.staff_id = int(request.form['staff_id']) if request.form['staff_id'] else None
+        db.session.commit()
+        flash('Event updated.')
+        return redirect(url_for('admin_dashboard'))
+
+    staff_list = User.query.filter_by(role='staff', approved=True, blacklisted=False).all()
+    return render_template('event_form.html', event=event, staff_list=staff_list)</code></pre>
+
+<h2>4. Delete event — POST, and children first</h2>
+<pre><code>@app.route('/admin/event/delete/&lt;int:event_id&gt;', methods=['POST'])
+def delete_event(event_id):
+    user = current_user()
+    if not user or user.role != 'admin':
+        return redirect(url_for('login'))
+
+    event = Event.query.get_or_404(event_id)
+    for b in event.bookings:            # remove bookings first (they point to this event)
+        db.session.delete(b)
+    db.session.delete(event)
+    db.session.commit()
+    flash('Event deleted.')
+    return redirect(url_for('admin_dashboard'))</code></pre>
+<p>Two viva answers baked in: (1) delete uses POST because GET must never change data — the delete
+button is a tiny inline form, not a link; (2) bookings are deleted first because their foreign key
+points at this event — this is manual cascading.</p>
+
+<h2>5. Users &amp; staff page: approve + blacklist</h2>
+<pre><code>@app.route('/admin/users')
+def admin_users():
+    user = current_user()
+    if not user or user.role != 'admin':
+        return redirect(url_for('login'))
+
+    attendees = User.query.filter_by(role='user').all()
+    staff = User.query.filter_by(role='staff').all()
+    return render_template('admin_users.html', attendees=attendees, staff=staff)
+
+
+@app.route('/admin/approve/&lt;int:user_id&gt;', methods=['POST'])
+def approve_staff(user_id):
+    user = current_user()
+    if not user or user.role != 'admin':
+        return redirect(url_for('login'))
+
+    person = User.query.get_or_404(user_id)
+    person.approved = True
+    db.session.commit()
+    flash(person.name + ' approved as staff.')
+    return redirect(url_for('admin_users'))
+
+
+@app.route('/admin/blacklist/&lt;int:user_id&gt;', methods=['POST'])
+def toggle_blacklist(user_id):
+    user = current_user()
+    if not user or user.role != 'admin':
+        return redirect(url_for('login'))
+
+    person = User.query.get_or_404(user_id)
+    person.blacklisted = not person.blacklisted     # flips True/False
+    db.session.commit()
+    flash(person.name + (' blacklisted.' if person.blacklisted else ' un-blacklisted.'))
+    return redirect(url_for('admin_users'))</code></pre>
+<p><code>admin_users.html</code>: two tables (staff, attendees); Approve button appears only for
+unapproved staff (<code>{% if not person.approved %}</code>); Blacklist button text flips with
+state.</p>
+
+<h2>6. Search by name or ID</h2>
+<pre><code>@app.route('/admin/search')
+def admin_search():
+    user = current_user()
+    if not user or user.role != 'admin':
+        return redirect(url_for('login'))
+
+    q = request.args.get('q', '')
+    events = Event.query.filter(Event.name.ilike('%' + q + '%')).all()
+    people = User.query.filter(User.name.ilike('%' + q + '%')).all()
+    if q.isdigit():   # searching by ID also works
+        event_by_id = Event.query.get(int(q))
+        person_by_id = User.query.get(int(q))
+        if event_by_id and event_by_id not in events:
+            events.append(event_by_id)
+        if person_by_id and person_by_id not in people:
+            people.append(person_by_id)
+    return render_template('admin_search.html', q=q, events=events, people=people)</code></pre>
+<p>GET (search should be shareable), <code>ilike</code> for case-insensitive substring, and if the
+query is a number it also tries it as an ID. Explain that flow and the search questions in the viva
+answer themselves.</p>
+
+<h2>7. All bookings</h2>
+<pre><code>@app.route('/admin/bookings')
+def admin_bookings():
+    user = current_user()
+    if not user or user.role != 'admin':
+        return redirect(url_for('login'))
+
+    bookings = Booking.query.all()
+    return render_template('admin_bookings.html', bookings=bookings)</code></pre>
+<p>The template prints <code>{{ b.user.name }}</code> and <code>{{ b.event.name }}</code> — those
+work because of the <strong>backref</strong>s in models.py. When asked "show backref in action",
+open this template.</p>
+
+<h2>8. Templates to copy + test + commit</h2>
+<p>Copy from reference: <code>admin_dashboard.html</code>, <code>event_form.html</code>,
+<code>admin_users.html</code>, <code>admin_search.html</code>, <code>admin_bookings.html</code>.
+Test: login as admin → add 2 events → edit one → approve your staff account → blacklist/unblacklist
+someone → search "eve" and a numeric ID → delete an event. Then:</p>
+<pre><code>git add .
+git commit -m "Milestone-3 TMA-MAD-1 Admin dashboard and management"
+git push</code></pre>
+
+<div class="pager">
+    <a href="15-build-2-auth.html">← Prev</a>
+    <a href="index.html">⌂ Home</a>
+    <a href="17-build-4-staff.html">Next: Build 4 — Staff Dashboard →</a>
+</div>
+</div>
+</body>
+</html>

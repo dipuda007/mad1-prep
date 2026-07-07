@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lesson 0: Setup</title>
+<link rel="icon" type="image/png" href="icon.png">
+<link rel="stylesheet" href="style.css">
+<script>(function(){var t=localStorage.getItem("mad1-theme");if(location.hash==="#force-dark")t="dark";if(location.hash==="#force-light")t="light";if(t==="dark"||(!t&&window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches))document.documentElement.setAttribute("data-theme","dark");})();</script>
+<script src="app.js" defer></script>
+</head>
+<body>
+<div class="topnav"><a href="index.html">🏔️ Home</a></div>
+<div class="wrap">
+
+<h1>Lesson 0: Setup</h1>
+<p><strong>Goal:</strong> Python + VS Code working, one project folder, one command run.</p>
+
+<h2>1. Install Python</h2>
+<p>You already have Python 3.14 installed (this prep confirmed it). To check on any machine,
+open PowerShell (press <kbd>Win</kbd>, type <em>powershell</em>, Enter) and run:</p>
+<pre><code>python --version</code></pre>
+<p>You should see something like <code>Python 3.14.5</code>. If instead Windows opens the Microsoft
+Store, install Python from <a href="https://www.python.org/downloads/">python.org</a> and during
+install <strong>tick "Add python.exe to PATH"</strong>.</p>
+
+<h2>2. Install VS Code</h2>
+<p>Download from <a href="https://code.visualstudio.com/">code.visualstudio.com</a>. After installing,
+open it and install one extension: press <kbd>Ctrl+Shift+X</kbd>, search <strong>Python</strong>
+(by Microsoft), click Install.</p>
+
+<h2>3. Make YOUR project folder</h2>
+<p>This will be the folder you build the EventHub demo app in (you will make a second,
+separate folder later for your own project). In PowerShell:</p>
+<pre><code>cd C:\projects
+mkdir eventhub-app
+cd eventhub-app
+code .</code></pre>
+<p><code>code .</code> opens the current folder in VS Code. From now on you work here.</p>
+
+<h2>4. The VS Code terminal</h2>
+<p>Inside VS Code press <kbd>Ctrl+`</kbd> (the key above Tab). A terminal opens at the bottom,
+already inside your folder. This is the same PowerShell — you will use this for everything:
+running Python, running Flask, git commands.</p>
+
+<h2>5. First run</h2>
+<p>In VS Code: File → New File → name it <code>hello.py</code> → type:</p>
+<pre><code>print("I am going to pass this viva")</code></pre>
+<p>Save with <kbd>Ctrl+S</kbd>. In the terminal:</p>
+<pre><code>python hello.py</code></pre>
+<p>If the sentence prints, your machine is ready.</p>
+
+<h2>6. Install the two packages the project needs</h2>
+<pre><code>pip install flask flask-sqlalchemy</code></pre>
+<p>If <code>pip</code> alone is not recognized, use <code>python -m pip install flask flask-sqlalchemy</code>.</p>
+
+<div class="tip"><strong>Virtual environments (venv):</strong> tutorials often start with venv. The official
+viva checklist itself says: <em>"Skip virtual environments if they cause issues, install packages
+globally if needed."</em> We install globally — one less thing to break during the viva. If asked in
+viva: a venv is an isolated folder of packages per project so different projects can use different
+package versions; created with <code>python -m venv venv</code>, activated with
+<code>venv\Scripts\activate</code>.</div>
+
+<div class="viva">"Which frameworks did you use?" — Flask (backend web framework), Jinja2 (template
+engine, comes with Flask), Flask-SQLAlchemy (ORM for the SQLite database), Bootstrap (CSS framework
+for the front end). These are exactly the ones the project statement mandates.</div>
+
+<div class="pager">
+    <a href="index.html">⌂ Home</a>
+    <a href="01-terminal.html">Next: The Terminal →</a>
+</div>
+</div>
+</body>
+</html>

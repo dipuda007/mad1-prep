@@ -1,0 +1,81 @@
+name: Build release (exe + apk)
+
+# Runs when you push a version tag, e.g.:
+#   git tag v1.0.0
+#   git push origin v1.0.0
+# Builds MAD1-Prep.exe (Windows) + MAD1-Prep.apk (Android) and attaches
+# both to a GitHub Release for that tag.
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  windows-exe:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install build tools
+        run: pip install pyinstaller pillow
+      - name: Build exe
+        run: powershell -ExecutionPolicy Bypass -File desktop/build_exe.ps1
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows-exe
+          path: desktop/dist/MAD1-Prep.exe
+
+  android-apk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Copy app pages into Android assets
+        run: |
+          mkdir -p android/app/src/main/assets/www
+          find . -maxdepth 1 -type f \( -name '*.html' -o -name '*.css' -o -name '*.js' \
+            -o -name '*.png' -o -name '*.ico' -o -name '*.svg' -o -name '*.gif' \) \
+            -exec cp {} android/app/src/main/assets/www/ \;
+          ls android/app/src/main/assets/www/
+      - name: Build APK
+        run: |
+          cd android
+          gradle wrapper --gradle-version 8.7
+          ./gradlew assembleDebug --no-daemon
+          cp app/build/outputs/apk/debug/app-debug.apk ../MAD1-Prep.apk
+      - uses: actions/upload-artifact@v4
+        with:
+          name: android-apk
+          path: MAD1-Prep.apk
+
+  release:
+    needs: [windows-exe, android-apk]
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          merge-multiple: true
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            MAD1-Prep.exe
+            MAD1-Prep.apk
+          body: |
+            ## MAD-1 Prep ${{ github.ref_name }}
+
+            | File | Platform | How to run |
+            |---|---|---|
+            | `MAD1-Prep.exe` | Windows 10/11 | Download, double-click. Opens in your browser. No install needed. |
+            | `MAD1-Prep.apk` | Android 7.0+ | Download on your phone, tap to install (allow "unknown sources"), open. Works offline. |
+
+            The exe has **⚙️ App settings → Check for updates** — it pulls the
+            latest lessons from this repo whenever the project changes next term.

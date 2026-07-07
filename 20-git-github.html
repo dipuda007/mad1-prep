@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lesson 20: Git &amp; GitHub</title>
+<link rel="icon" type="image/png" href="icon.png">
+<link rel="stylesheet" href="style.css">
+<script>(function(){var t=localStorage.getItem("mad1-theme");if(location.hash==="#force-dark")t="dark";if(location.hash==="#force-light")t="light";if(t==="dark"||(!t&&window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches))document.documentElement.setAttribute("data-theme","dark");})();</script>
+<script src="app.js" defer></script>
+</head>
+<body>
+<div class="topnav"><a href="index.html">🏔️ Home</a></div>
+<div class="wrap">
+
+<h1>Lesson 20: Git &amp; GitHub from the VS Code terminal</h1>
+<p><strong>Goal:</strong> commit + push every milestone; switch GitHub accounts cleanly on
+Windows. Your repo <code>MAD-1-PROJECT-IITM</code> already exists with Milestone 0 done ✅.</p>
+
+<h2>What is Git? What is GitHub? (viva staple)</h2>
+<p><strong>Git</strong> is a version control system (VCS): it records snapshots ("commits") of
+your project so you can see history and go back. It is <strong>distributed</strong> — every
+machine has the complete history, no central server required to work.
+<strong>GitHub</strong> is a website that hosts git repositories online — your backup + the place
+IITM tracks your milestones. Git = tool, GitHub = hosting service.</p>
+
+<h2>One-time setup on this machine</h2>
+<p>Check git exists (VS Code terminal):</p>
+<pre><code>git --version</code></pre>
+<p>If missing → install from <a href="https://git-scm.com/download/win">git-scm.com</a> (defaults
+are fine, restart VS Code after).</p>
+<p>Tell git who you are — this name/email is stamped on every commit. Use the email of your
+<strong>IITM GitHub account (24f2008594)</strong>:</p>
+<pre><code>git config --global user.name "24f2008594"
+git config --global user.email "24f2008594@ds.study.iitm.ac.in"</code></pre>
+<p>Verify:</p>
+<pre><code>git config --global user.name
+git config --global user.email</code></pre>
+
+<h2>Logging OUT an old GitHub account (Windows)</h2>
+<p>Windows stores GitHub logins in <strong>Credential Manager</strong>, not in git itself. If this
+PC ever pushed as a different GitHub user, remove that first:</p>
+<p><strong>Way 1 — command line:</strong></p>
+<pre><code>cmdkey /list | findstr github</code></pre>
+<p>If you see entries like <code>LegacyGeneric:target=git:https://github.com</code>, delete:</p>
+<pre><code>cmdkey /delete:LegacyGeneric:target=git:https://github.com</code></pre>
+<p><strong>Way 2 — GUI (easier):</strong> press <kbd>Win</kbd>, type <em>Credential Manager</em> →
+Windows Credentials → find every entry mentioning <code>github.com</code> → Remove.</p>
+<p><strong>Way 3 — via git's credential manager:</strong></p>
+<pre><code>git credential-manager github logout</code></pre>
+<p>Any one of the three works. After this, the machine has no GitHub login.</p>
+
+<h2>Logging IN the new (IITM) account</h2>
+<p>Nothing to do in advance — the <strong>first time you push</strong>, a browser window pops up
+asking you to sign in to GitHub. Sign in as <strong>24f2008594</strong>, click Authorize, done.
+Credential Manager remembers it from then on. (This popup is Git Credential Manager, installed
+with Git for Windows.)</p>
+<div class="warn">If the browser popup logs into the WRONG account: log out of github.com in the
+browser first (github.com → avatar → Sign out), clear the credential as above, push again.</div>
+
+<h2>Daily workflow — the only 4 commands you need</h2>
+<pre><code>git status                     # what changed? (red = unstaged, green = staged)
+git add .                      # stage ALL changes in this folder
+git commit -m "message"        # snapshot with a message
+git push                       # upload to GitHub</code></pre>
+<p>That's it. After each milestone: <code>add → commit</code> with the milestone's
+<strong>unique message</strong> <code>→ push</code>. Any number of extra commits is allowed — the
+milestone just needs one commit with its unique message.</p>
+
+<h2>Connecting your project folder to your existing repo</h2>
+<p>Your repo already exists (created for Milestone 0). Two situations:</p>
+<p><strong>A. You already cloned it</strong> (folder came from <code>git clone</code>) — build the
+project inside that folder; add/commit/push just work.</p>
+<p><strong>B. You built in a fresh folder</strong> (e.g. <code>eventhub-app</code>) — connect it
+once:</p>
+<pre><code>cd C:\projects\eventhub-app
+git init
+git remote add origin https://github.com/24f2008594/MAD-1-PROJECT-IITM.git
+git pull origin main            # brings in your existing readme.md
+git branch -M main
+git add .
+git commit -m "Milestone-1 TMA-MAD-1 Database models and schema setup"
+git push -u origin main         # -u only needed the first time</code></pre>
+
+<h2>Files git should ignore</h2>
+<p>Create a file named exactly <code>.gitignore</code> in the project folder:</p>
+<pre><code>__pycache__/
+instance/
+venv/
+*.pyc</code></pre>
+<p>The database and Python cache are machine-generated — they don't belong in history. (Viva:
+"what is .gitignore?" — a list of path patterns git must not track.)</p>
+
+<h2>Commands proctors ask about (even if you never use them)</h2>
+<table>
+<tr><th>Command</th><th>What it does</th></tr>
+<tr><td><code>git log --oneline</code></td><td>list commits (your milestone proof!)</td></tr>
+<tr><td><code>git branch new-feature</code></td><td>create a branch (parallel line of development)</td></tr>
+<tr><td><code>git checkout new-feature</code></td><td>switch to it (<code>git checkout -b x</code> = create + switch)</td></tr>
+<tr><td><code>git merge new-feature</code></td><td>bring a branch's commits into the current branch</td></tr>
+<tr><td><code>git clone URL</code></td><td>download a repo with full history</td></tr>
+<tr><td><code>git rm --cached file</code></td><td>stop tracking a file but keep it on disk ("no longer track" viva Q)</td></tr>
+</table>
+
+<div class="viva">"Is git centralized or distributed?" — distributed: every clone holds the full
+history; you can commit offline. Centralized VCS (like old SVN) needs the central server for every
+operation. "Git vs GitHub?" — tool vs hosting. "Uses of git besides tracking?" — collaboration,
+branches for experiments, reverting mistakes, and here: proving the project is your own work over
+time (IITM checks your commit history as plagiarism evidence!).</div>
+
+<div class="warn"><strong>Course rules reminder:</strong> repo must stay <strong>private</strong>,
+with <code>MADI-cs2003</code> added as collaborator (done in Milestone 0). Never upload the project
+to any public repo, never share code — if two submissions match, BOTH students get U grade.</div>
+
+<div class="pager">
+    <a href="19-build-6-history.html">← Prev</a>
+    <a href="index.html">⌂ Home</a>
+    <a href="21-submission.html">Next: Final Submission →</a>
+</div>
+</div>
+</body>
+</html>

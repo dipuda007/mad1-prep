@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Build 2: Authentication</title>
+<link rel="icon" type="image/png" href="icon.png">
+<link rel="stylesheet" href="style.css">
+<script>(function(){var t=localStorage.getItem("mad1-theme");if(location.hash==="#force-dark")t="dark";if(location.hash==="#force-light")t="light";if(t==="dark"||(!t&&window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches))document.documentElement.setAttribute("data-theme","dark");})();</script>
+<script src="app.js" defer></script>
+</head>
+<body>
+<div class="topnav"><a href="index.html">🏔️ Home</a></div>
+<div class="wrap">
+
+<h1>Build 2: Authentication &amp; Role-Based Access</h1>
+<div class="warn" style="border-left-width:8px">
+<strong>⚠️ READ THIS BEFORE TYPING A SINGLE LINE:</strong> this lesson builds
+<strong>EventHub — a demo app</strong>. It is <strong>NOT the official MAD-1 project</strong>
+and NOT a submission-ready solution for any term. This code is AI-generated teaching material.
+Copy-pasting it (or any public code) into your MAD-1 submission is plagiarism — IITM's
+similarity checks WILL flag it and you can be <strong>disqualified (U grade)</strong>.
+Learn the pattern here, then write YOUR project's code yourself, line by line.
+</div>
+<p><strong>Milestone:</strong> registration, login, admin login (no admin registration), staff
+approval gate, role-specific dashboard redirects.</p>
+
+<h2>1. base.html — the shared layout first</h2>
+<p>Create folder <code>templates</code>, inside it <code>base.html</code>. Type it out in full —
+the structure:</p>
+<pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+&lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+    &lt;title&gt;{% block title %}EventHub{% endblock %}&lt;/title&gt;
+    &lt;link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"&gt;
+    &lt;link href="{{ url_for('static', filename='style.css') }}" rel="stylesheet"&gt;
+&lt;/head&gt;
+&lt;body&gt;
+
+&lt;nav class="navbar navbar-expand navbar-dark bg-success"&gt;
+    &lt;div class="container"&gt;
+        &lt;a class="navbar-brand" href="{{ url_for('index') }}"&gt;🏔️ EventManager&lt;/a&gt;
+        &lt;div class="navbar-nav ms-auto"&gt;
+            {% if session.get('user_id') %}
+                {% if session.get('role') == 'admin' %}
+                    &lt;a class="nav-link" href="{{ url_for('admin_dashboard') }}"&gt;Dashboard&lt;/a&gt;
+                    &lt;a class="nav-link" href="{{ url_for('admin_users') }}"&gt;Users &amp;amp; Staff&lt;/a&gt;
+                    &lt;a class="nav-link" href="{{ url_for('admin_bookings') }}"&gt;Bookings&lt;/a&gt;
+                {% elif session.get('role') == 'staff' %}
+                    &lt;a class="nav-link" href="{{ url_for('staff_dashboard') }}"&gt;My Events&lt;/a&gt;
+                {% else %}
+                    &lt;a class="nav-link" href="{{ url_for('user_dashboard') }}"&gt;Dashboard&lt;/a&gt;
+                {% endif %}
+                &lt;a class="nav-link" href="{{ url_for('profile') }}"&gt;Profile&lt;/a&gt;
+                &lt;a class="nav-link" href="{{ url_for('logout') }}"&gt;Logout&lt;/a&gt;
+            {% else %}
+                &lt;a class="nav-link" href="{{ url_for('login') }}"&gt;Login&lt;/a&gt;
+                &lt;a class="nav-link" href="{{ url_for('register') }}"&gt;Register&lt;/a&gt;
+            {% endif %}
+        &lt;/div&gt;
+    &lt;/div&gt;
+&lt;/nav&gt;
+
+&lt;div class="container mt-4"&gt;
+    {% for message in get_flashed_messages() %}
+        &lt;div class="alert alert-info"&gt;{{ message }}&lt;/div&gt;
+    {% endfor %}
+
+    {% block content %}{% endblock %}
+&lt;/div&gt;
+
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+<p>Key points: the navbar shows different links per role by reading <code>session</code>
+(templates can access it directly); flash messages appear on every page; two CSS files — Bootstrap
+(CDN) + your own. <strong>Note:</strong> the navbar links reference routes you haven't written yet
+(admin_dashboard etc.) — Jinja only evaluates the branch that matches the logged-in role, and
+you'll add those routes in Builds 3–5. If you want to test base.html right now, comment out the
+role-specific links temporarily.</p>
+
+<p>Also create <code>static/style.css</code> (copy from reference — 4 small rules: page background,
+green strip on stat cards, card shadow, heading colour).</p>
+
+<h2>2. Routes: index, register, login, logout, profile</h2>
+<p>Add between <code>db.init_app(app)</code> and <code>setup_database()</code>. First a helper:</p>
+<pre><code>def current_user():
+    # returns the logged-in User row, or None
+    if 'user_id' in session:
+        return User.query.get(session['user_id'])
+    return None
+
+
+def today():
+    return datetime.now().strftime('%Y-%m-%d')</code></pre>
+
+<p>The traffic-director route — this is your "role-specific dashboards after login":</p>
+<pre><code>@app.route('/')
+def index():
+    user = current_user()
+    if not user:
+        return redirect(url_for('login'))
+    if user.role == 'admin':
+        return redirect(url_for('admin_dashboard'))
+    if user.role == 'staff':
+        return redirect(url_for('staff_dashboard'))
+    return redirect(url_for('user_dashboard'))</code></pre>
+
+<p>Register — note the two requirement-critical lines: duplicate-username check, and
+<code>approved=(role == 'user')</code> which makes staff unapproved from birth:</p>
+<pre><code>@app.route('/register', methods=['GET', 'POST'])
+def register():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        name = request.form['name']
+        role = request.form['role']            # 'user' or 'staff'
+        phone = request.form['phone']
+
+        if User.query.filter_by(username=username).first():
+            flash('Username already taken, pick another one.')
+            return redirect(url_for('register'))
+
+        user = User(username=username,
+                    password_hash=generate_password_hash(password),
+                    name=name,
+                    role=role,
+                    approved=(role == 'user'))   # staff must wait for admin approval
+        db.session.add(user)
+        db.session.commit()
+
+        if role == 'staff':
+            profile = StaffProfile(user_id=user.id, phone=phone)
+            db.session.add(profile)
+            db.session.commit()
+            flash('Registered! Wait for admin approval before logging in.')
+        else:
+            flash('Registered! You can log in now.')
+        return redirect(url_for('login'))
+
+    return render_template('register.html')</code></pre>
+<p>Why is there no "admin" option in the role dropdown? Because the statement says admin cannot
+register — admin exists from Build 1's seeding. Say that sentence in the viva.</p>
+
+<p>Login — four gates in order: user exists → password matches → not blacklisted → staff approved:</p>
+<pre><code>@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        user = User.query.filter_by(username=username).first()
+
+        if not user or not check_password_hash(user.password_hash, password):
+            flash('Wrong username or password.')
+            return redirect(url_for('login'))
+        if user.blacklisted:
+            flash('Your account is blacklisted. Contact admin.')
+            return redirect(url_for('login'))
+        if user.role == 'staff' and not user.approved:
+            flash('Your staff account is not approved yet.')
+            return redirect(url_for('login'))
+
+        session['user_id'] = user.id
+        session['role'] = user.role
+        return redirect(url_for('index'))
+
+    return render_template('login.html')
+
+
+@app.route('/logout')
+def logout():
+    session.clear()
+    flash('Logged out.')
+    return redirect(url_for('login'))</code></pre>
+
+<p>Profile (edit own name/password, staff also phone/experience):</p>
+<pre><code>@app.route('/profile', methods=['GET', 'POST'])
+def profile():
+    user = current_user()
+    if not user:
+        return redirect(url_for('login'))
+
+    if request.method == 'POST':
+        user.name = request.form['name']
+        if request.form['password']:                       # only change if box not empty
+            user.password_hash = generate_password_hash(request.form['password'])
+        if user.staff_profile:
+            user.staff_profile.phone = request.form['phone']
+            user.staff_profile.experience = request.form['experience']
+        db.session.commit()
+        flash('Profile updated.')
+        return redirect(url_for('profile'))
+
+    return render_template('profile.html', user=user)</code></pre>
+
+<h2>3. Templates: login.html, register.html, profile.html</h2>
+<p>Write all three yourself — plain Bootstrap forms extending base.html. <code>login.html</code>:
+username + password inputs in a POST form. <code>register.html</code>: adds name, phone and a role
+dropdown. <code>profile.html</code>: shows the logged-in user's fields in a table.
+The register form's role dropdown:</p>
+<pre><code>&lt;select name="role" class="form-select"&gt;
+    &lt;option value="user"&gt;Attendee (User)&lt;/option&gt;
+    &lt;option value="staff"&gt;Event Staff&lt;/option&gt;
+&lt;/select&gt;</code></pre>
+
+<h2>4. Test it properly (do all of these)</h2>
+<ol>
+<li>Register a attendee → login → lands on error (user dashboard doesn't exist yet — expected, Build 5).
+Actually: index redirects to <code>url_for('user_dashboard')</code> which errors. To test now,
+temporarily make index return <code>f"Logged in as {user.name} ({user.role})"</code> instead of the
+redirects, then restore it in Build 5.</li>
+<li>Register a staff → try login → must be blocked "not approved yet".</li>
+<li>Login admin/admin123 → works.</li>
+<li>Wrong password → "Wrong username or password."</li>
+<li>Register same username twice → blocked.</li>
+</ol>
+
+<h2>5. Commit</h2>
+<pre><code>git add .
+git commit -m "Milestone-2 TMA-MAD-1 Authentication and role-based access"
+git push</code></pre>
+
+<div class="viva">Own these three answers now: (1) passwords are hashed with
+generate_password_hash — one-way, salted; (2) session stores user_id + role in a signed cookie —
+that's how the app remembers you; (3) staff approval = an <code>approved</code> boolean checked at
+login, flipped by admin.</div>
+
+<div class="pager">
+    <a href="14-build-1-models.html">← Prev</a>
+    <a href="index.html">⌂ Home</a>
+    <a href="16-build-3-admin.html">Next: Build 3 — Admin Dashboard →</a>
+</div>
+</div>
+</body>
+</html>

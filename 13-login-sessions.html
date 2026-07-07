@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lesson 13: Login &amp; Sessions</title>
+<link rel="icon" type="image/png" href="icon.png">
+<link rel="stylesheet" href="style.css">
+<script>(function(){var t=localStorage.getItem("mad1-theme");if(location.hash==="#force-dark")t="dark";if(location.hash==="#force-light")t="light";if(t==="dark"||(!t&&window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches))document.documentElement.setAttribute("data-theme","dark");})();</script>
+<script src="app.js" defer></script>
+</head>
+<body>
+<div class="topnav"><a href="index.html">🏔️ Home</a></div>
+<div class="wrap">
+
+<h1>Lesson 13: Login &amp; Sessions</h1>
+<p><strong>Goal:</strong> how "being logged in" works. Last theory lesson before you build.</p>
+
+<h2>The problem</h2>
+<p>HTTP is stateless — the server forgets you after every request. So how does the app know
+request #2 comes from the same logged-in Ravi as request #1?</p>
+
+<h2>Sessions + cookies</h2>
+<p>Flask's <code>session</code> is a dictionary that survives between requests <em>per visitor</em>:</p>
+<pre><code>from flask import session
+
+# at login:
+session['user_id'] = user.id
+session['role'] = user.role
+
+# later, any route:
+if 'user_id' in session: ...      # someone is logged in
+
+# at logout:
+session.clear()</code></pre>
+<p>Under the hood Flask stores this dict in a <strong>cookie</strong> (a small piece of data the
+browser keeps and re-sends with every request). The cookie is <strong>signed</strong> with your
+<code>SECRET_KEY</code> so users can't tamper with it.</p>
+
+<div class="viva">"What is the secret key for? What breaks without it?" — it cryptographically
+signs the session cookie (and flash messages use the session too). Without it, Flask raises an
+error the moment you use session or flash. If the key changes, all existing sessions become
+invalid — everyone is logged out. "Cookies vs session?" — a cookie is browser-side storage sent
+with each request; the session is the server's concept of per-user data, which Flask happens to
+store inside a signed cookie. "Ways to store data client-side?" — cookies, localStorage,
+sessionStorage (the latter two via JS).</div>
+
+<h2>Password hashing — never store plain passwords</h2>
+<pre><code>from werkzeug.security import generate_password_hash, check_password_hash
+
+# at register:
+user.password_hash = generate_password_hash('secret123')
+# stores something like: scrypt:32768:8:1$Kj2...  — cannot be reversed
+
+# at login:
+check_password_hash(user.password_hash, typed_password)   # True/False</code></pre>
+<div class="viva">"Hashing vs encryption?" — encryption is reversible (with a key you get the
+original back); hashing is one-way — you can never recover the password from the hash. Login works
+by hashing the typed password and comparing hashes. "Why do two users with the same password have
+different hashes?" — a random <em>salt</em> is mixed in before hashing and stored inside the hash
+string; same input + different salt = different hash. This also defeats precomputed
+rainbow-table attacks.</div>
+
+<h2>Role-based access control (RBAC)</h2>
+<p>Each user row carries a <code>role</code>. After login you route them to their own dashboard,
+and every protected route re-checks the role:</p>
+<pre><code>@app.route('/admin')
+def admin_dashboard():
+    user = current_user()
+    if not user or user.role != 'admin':
+        return redirect(url_for('login'))
+    ...</code></pre>
+<div class="viva">"Authentication vs authorization?" — THE most asked viva question.
+<strong>Authentication</strong> = verifying who you are (username + password check at login).
+<strong>Authorization</strong> = verifying what you're allowed to do (role check at the top of each
+route). In your code: authentication is the <code>check_password_hash</code> block in
+<code>login()</code>; authorization is the <code>user.role != 'admin'</code> guard in every admin
+route. Point at both. "What is RBAC?" — role-based access control: permissions attached to roles
+(admin/staff/user), users get the permissions of their role.</div>
+
+<h2>flash() — one-time messages</h2>
+<pre><code>from flask import flash
+flash('Event booked!')                 # store message in session
+return redirect(url_for('user_dashboard'))</code></pre>
+<pre><code>&lt;!-- base.html shows and empties the stored messages --&gt;
+{% for message in get_flashed_messages() %}
+    &lt;div class="alert alert-info"&gt;{{ message }}&lt;/div&gt;
+{% endfor %}</code></pre>
+<p>Flash rides on the session (hence needs SECRET_KEY) and disappears after being displayed once.</p>
+
+<div class="tip"><strong>Why not Flask-Login?</strong> Flask-Login is an extension that automates
+this (login_user(), @login_required, UserMixin, current_user). It's an <em>optional</em> milestone.
+Plain sessions are fewer moving parts and easier to defend line-by-line in a viva. If asked: "I
+implemented sessions directly to show I understand the mechanism Flask-Login abstracts away."</div>
+
+<div class="pager">
+    <a href="12-sqlalchemy.html">← Prev</a>
+    <a href="index.html">⌂ Home</a>
+    <a href="14-build-1-models.html">Next: BUILD — Database Models →</a>
+</div>
+</div>
+</body>
+</html>

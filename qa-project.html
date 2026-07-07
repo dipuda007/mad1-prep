@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Q&amp;A: Your Project</title>
+<link rel="icon" type="image/png" href="icon.png">
+<link rel="stylesheet" href="style.css">
+<script>(function(){var t=localStorage.getItem("mad1-theme");if(location.hash==="#force-dark")t="dark";if(location.hash==="#force-light")t="light";if(t==="dark"||(!t&&window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches))document.documentElement.setAttribute("data-theme","dark");})();</script>
+<script src="app.js" defer></script>
+</head>
+<body>
+<div class="topnav"><a href="index.html">🏔️ Home</a></div>
+<div class="wrap">
+
+<h1>Q&amp;A: The Event-booking App Itself (30 questions)</h1>
+<div class="warn">
+<strong>⚠️ Note:</strong> examples on this page reference <strong>EventHub</strong>,
+the demo app built in this course — not any term's official project. Map every pattern to
+YOUR statement and never copy code into your submission (plagiarism = U grade).
+</div>
+<p>Questions aimed at YOUR code. Answers reference exact files/lines — open the code while
+drilling these.</p>
+
+<div class="qa"><p class="q">1. Walk me through your project structure.</p><p class="a">app.py — Flask config + all route functions (controllers) + setup_database() seeding; models.py — 4 tables; templates/ — 12 Jinja pages sharing base.html; static/style.css — my CSS; requirements.txt — Flask, Flask-SQLAlchemy; instance/eventhub.db — SQLite file created at first run.</p></div>
+<div class="qa"><p class="q">2. What did you understand from the problem statement?</p><p class="a">Event-booking groups coordinate manually (spreadsheets/calls) → hard to track bookings, prevent overbooking, keep history. Build a three-role web app: admin runs the system, staff manage assigned events, attendees book — with role-based access and booking integrity rules.</p></div>
+<div class="qa"><p class="q">3. Explain your models and relationships.</p><p class="a">User (all 3 roles via role column; approved + blacklisted flags), StaffProfile (1-1 with User via user_id FK + uselist=False), Event (details + status + staff_id FK → the assigned staff User), Booking (user_id + event_id FKs, status, payment_status, booking_date). 1-N: user→bookings, event→bookings, staff→events.</p></div>
+<div class="qa"><p class="q">4. Why one User table for three roles instead of three tables?</p><p class="a">Login is a single lookup, no duplicated auth columns, role column switches behaviour. Staff-only extra fields go in the separate StaffProfile (keeps User lean, demonstrates 1-1).</p></div>
+<div class="qa"><p class="q">5. How is the admin created? Why no admin registration?</p><p class="a">setup_database() runs at startup: create_all(), then inserts admin (username admin, hashed password) only if no admin exists. Statement requires admin to pre-exist programmatically; register form only offers user/staff.</p></div>
+<div class="qa"><p class="q">6. How does registration differ for staff vs user?</p><p class="a">Same form; role dropdown. Staff get approved=False (login blocked until admin approves) and a StaffProfile row with phone. Users get approved=True immediately.</p></div>
+<div class="qa"><p class="q">7. Explain your login flow line by line.</p><p class="a">Look up user by username → if missing or check_password_hash fails: flash + back (one vague message so attackers can't tell which was wrong) → blacklisted? blocked → staff and not approved? blocked → store user_id + role in session → redirect to index which routes by role to /admin, /staff or /user.</p></div>
+<div class="qa"><p class="q">8. How do users get to different dashboards?</p><p class="a">index() reads current_user(); role == admin → admin_dashboard, staff → staff_dashboard, else user_dashboard. The navbar also renders different links per session role.</p></div>
+<div class="qa"><p class="q">9. How is dashboard access restricted?</p><p class="a">Every route starts with the guard: current_user() exists and has the right role, else redirect to login. Staff routes add ownership: event.staff_id == user.id.</p></div>
+<div class="qa"><p class="q">10. What is current_user()?</p><p class="a">My helper: if 'user_id' in session, fetch the User row (User.query.get), else None. One place to answer "who is logged in".</p></div>
+<div class="qa"><p class="q">11. How does the admin dashboard get its counts?</p><p class="a">A stats dict of four .count() queries — Event.query.count(), User filtered by role for users/staff, Booking.query.count() — passed to the template's stat cards.</p></div>
+<div class="qa"><p class="q">12. Explain add event vs edit event.</p><p class="a">Both render the same event_form.html. Add: GET shows blank form (event=None), POST builds an event from form fields (ints converted) and add+commit. Edit: get_or_404 loads it, POST overwrites fields, commit only — the object is already in the session.</p></div>
+<div class="qa"><p class="q">13. How is staff assigned to an event?</p><p class="a">The form's staff dropdown lists approved, non-blacklisted staff; the chosen id lands in event.staff_id. Empty choice stores None (NULL FK). Reassigning = edit event, choose another.</p></div>
+<div class="qa"><p class="q">14. Why is delete a POST with a loop over bookings?</p><p class="a">GET must never modify data (crawlers/prefetch would delete events!), so the delete button is a mini form. Bookings reference the event via FK, so children are deleted first — manual cascade, visible in code.</p></div>
+<div class="qa"><p class="q">15. How does approve work?</p><p class="a">POST /admin/approve/&lt;id&gt; → get_or_404 → person.approved = True → commit. Button rendered only for unapproved staff ({% if not person.approved %}).</p></div>
+<div class="qa"><p class="q">16. How does blacklist work? Blacklist vs delete?</p><p class="a">toggle: person.blacklisted = not person.blacklisted. Login checks it and blocks. Blacklist preserves the account + history and is reversible; delete would orphan bookings and lose history — that's why I blacklist instead of deleting people.</p></div>
+<div class="qa"><p class="q">17. Explain your search (admin).</p><p class="a">GET /admin/search?q=... → events by name ilike, people by name ilike; if q is all digits, also try Event.query.get / User.query.get and append if not already found → results template with two tables. Name OR id, case-insensitive, substring.</p></div>
+<div class="qa"><p class="q">18. Explain the user search/filter.</p><p class="a">GET form feeds request.args. Start from Event.query.filter_by(status='Open'); add filter_by(category=...) if chosen; add location ilike if typed; .all(). Chaining filters = AND conditions.</p></div>
+<div class="qa"><p class="q">19. Recite the booking guards.</p><p class="a">(1) event.status != 'Open' → reject; (2) available_slots &lt;= 0 → reject (overbooking); (3) existing Booking with same user_id+event_id+status='Booked' → reject (duplicate). Then create booking with today's date, slots -= 1, one commit.</p></div>
+<div class="qa"><p class="q">20. Why does the duplicate check filter status='Booked'?</p><p class="a">So a cancelled booking doesn't block rebooking. Deliberate: cancel → slot returned → user may book again; history keeps both rows.</p></div>
+<div class="qa"><p class="q">21. How do you prevent overbooking exactly?</p><p class="a">Slot counter on Event: decremented on each booking inside the same commit, incremented on cancel; booking route rejects when &lt;= 0. Plus staff can raise/lower slots.</p></div>
+<div class="qa"><p class="q">22. How does cancel work? Why not delete the booking row?</p><p class="a">POST → get_or_404 → ownership check (booking.user_id == session user) → only if status 'Booked': set 'Cancelled', slots += 1, commit. Row kept: history must be complete — status change instead of deletion.</p></div>
+<div class="qa"><p class="q">23. How do staff see only their events?</p><p class="a">Event.query.filter_by(staff_id=user.id) in staff_dashboard — the query itself is the restriction, not the template.</p></div>
+<div class="qa"><p class="q">24. How is "only assigned staff can manage" enforced?</p><p class="a">Ownership checks in every staff action: staff_update_event checks event.staff_id != user.id; staff_update_booking checks booking.event.staff_id != user.id (via backref); participants blocks staff on non-assigned events (admin allowed).</p></div>
+<div class="qa"><p class="q">25. What are your event/booking status lifecycles?</p><p class="a">Event: Pending → Approved → Open → Closed → Completed (admin sets any; staff move among Approved/Open/Closed/Completed; booking allowed only in Open). Booking: Booked → Cancelled (user/staff) or → Completed (staff).</p></div>
+<div class="qa"><p class="q">26. Where does the booking count on the staff card come from?</p><p class="a">A counts dict built in the route: for each assigned event, Booking.query.filter_by(event_id, status='Booked').count() — cancelled ones excluded on purpose.</p></div>
+<div class="qa"><p class="q">27. What is payment_status? There's no payment gateway…</p><p class="a">A field from the milestone's Booking spec. No real gateway (out of scope), so it defaults to 'Paid' at booking; the column exists so payment state can be tracked/extended. Honest answer, better than pretending.</p></div>
+<div class="qa"><p class="q">28. What challenges did you face? (soft question — prepare a real one)</p><p class="a">Good honest options: understanding how session keeps login across stateless HTTP; getting relationships/backrefs right (staff vs booking user both FK to User); remembering create_all doesn't alter tables (deleted the DB during development after model changes); slot arithmetic staying consistent across book/cancel/staff-cancel paths.</p></div>
+<div class="qa"><p class="q">29. What would you improve with more time?</p><p class="a">Chart.js summary charts, JSON API endpoints, Flask-Login, CSRF tokens via Flask-WTF, pagination for long tables, date validation (end after start), profile pictures. Naming concrete extensions shows awareness without over-claiming.</p></div>
+<div class="qa"><p class="q">30. Rate your project / is this your field of interest? (they actually ask)</p><p class="a">Be honest + grounded: "It meets every core requirement and I understand each line; UI is simple by choice. I'd rate it a solid core implementation with room for the optional enhancements." Interest: answer truthfully — proctors respect honesty.</p></div>
+
+<div class="pager">
+    <a href="qa-git.html">← Prev</a>
+    <a href="index.html">⌂ Home</a>
+    <a href="qa-code-tasks.html">Next: Live Code Tasks →</a>
+</div>
+</div>
+</body>
+</html>

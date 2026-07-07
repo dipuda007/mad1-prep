@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Q&amp;A: SQL, SQLite &amp; ORM</title>
+<link rel="icon" type="image/png" href="icon.png">
+<link rel="stylesheet" href="style.css">
+<script>(function(){var t=localStorage.getItem("mad1-theme");if(location.hash==="#force-dark")t="dark";if(location.hash==="#force-light")t="light";if(t==="dark"||(!t&&window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches))document.documentElement.setAttribute("data-theme","dark");})();</script>
+<script src="app.js" defer></script>
+</head>
+<body>
+<div class="topnav"><a href="index.html">🏔️ Home</a></div>
+<div class="wrap">
+
+<h1>Q&amp;A: SQL, SQLite &amp; ORM (50 questions)</h1>
+<p>The single most-examined area. Proctors reportedly spend 30+ minutes on models alone.</p>
+
+<h2>Database concepts</h2>
+<div class="qa"><p class="q">1. What is a database? DBMS?</p><p class="a">Organized persistent storage of data. DBMS = the software managing it (SQLite, MySQL, PostgreSQL). Relational DBMS = data in tables with relationships.</p></div>
+<div class="qa"><p class="q">2. Why SQLite? SQLite vs MySQL?</p><p class="a">SQLite: serverless, zero-config, single file, ideal for local single-user apps — and the only DB the project permits. MySQL: separate server, concurrent users, networked, production scale.</p></div>
+<div class="qa"><p class="q">3. Structured vs unstructured data/database?</p><p class="a">Structured: fixed schema of rows/columns (SQL). Unstructured: no fixed shape — text, images, video. Semi-structured: JSON/XML (NoSQL DBs like MongoDB).</p></div>
+<div class="qa"><p class="q">4. What is a schema?</p><p class="a">The structure definition: tables, columns, types, constraints, relationships. Mine: User, StaffProfile, Event, Booking + their FKs (drawn as the ER diagram in my report).</p></div>
+<div class="qa"><p class="q">5. What is an ER diagram?</p><p class="a">Entity-Relationship diagram — boxes for tables/entities with attributes, lines for relationships with cardinality (1-1, 1-N, N-M).</p></div>
+<div class="qa"><p class="q">6. Primary key? Can it be NULL?</p><p class="a">Column uniquely identifying each row; NOT NULL and unique by definition; one per table. All my tables use an auto-incrementing integer id.</p></div>
+<div class="qa"><p class="q">7. Foreign key?</p><p class="a">Column holding another table's primary key to create a relationship — booking.user_id → user.id, booking.event_id → event.id, event.staff_id → user.id, staffprofile.user_id → user.id.</p></div>
+<div class="qa"><p class="q">8. Primary vs unique key?</p><p class="a">Both forbid duplicates. Primary: the row identifier, exactly one, never NULL. Unique: any number allowed, may allow NULL. username is unique but id is the primary key.</p></div>
+<div class="qa"><p class="q">9. Composite key?</p><p class="a">A primary key made of multiple columns together (e.g. (user_id, event_id) could identify a booking pair). I used surrogate integer ids instead — simpler and allows rebooking history.</p></div>
+<div class="qa"><p class="q">10. Types of constraints?</p><p class="a">PRIMARY KEY, FOREIGN KEY, UNIQUE, NOT NULL, DEFAULT, CHECK. In SQLAlchemy: primary_key=True, ForeignKey(), unique=True, nullable=False, default=.</p></div>
+<div class="qa"><p class="q">11. What is NULL? NULL vs NOT NULL?</p><p class="a">NULL = absence of a value (not 0, not ""). NOT NULL constraint forbids it. event.staff_id is NULL until admin assigns staff — my "Not assigned" display checks that.</p></div>
+<div class="qa"><p class="q">12. Relationship types + examples from YOUR app?</p><p class="a">1-1: User↔StaffProfile. 1-N: User→Bookings, Event→Bookings, staff User→Events. N-M: none needed — would require a junction table of FK pairs.</p></div>
+<div class="qa"><p class="q">13. Convert 1-N to N-M?</p><p class="a">Remove the single FK; create an association table with both FKs (e.g. event_staff(event_id, staff_id)) — each row is one pairing; in SQLAlchemy use the secondary= parameter.</p></div>
+<div class="qa"><p class="q">14. What is normalization?</p><p class="a">Structuring tables to eliminate redundant data (each fact stored once). E.g. bookings store event_id, not the event's name/location — those live once in event. Levels are normal forms (1NF: atomic values; 2NF/3NF: attributes depend on the key, nothing else).</p></div>
+<div class="qa"><p class="q">15. What is an index?</p><p class="a">A lookup structure making searches on a column fast (like a book index), at the cost of storage and slower writes. Primary keys are indexed automatically.</p></div>
+<div class="qa"><p class="q">16. What is a transaction / ACID?</p><p class="a">A group of operations that succeed or fail together. ACID: Atomicity (all-or-nothing), Consistency (rules preserved), Isolation (parallel transactions don't interfere), Durability (committed = permanent). My booking = insert + slot decrement in ONE commit — atomic.</p></div>
+<div class="qa"><p class="q">17. What is a view in SQL?</p><p class="a">A saved SELECT query that acts like a virtual table. Not used in my project — Jinja templates are my "views" in the MVC sense (different concept, same word: know both).</p></div>
+<div class="qa"><p class="q">18. DELETE vs TRUNCATE vs DROP?</p><p class="a">DELETE removes rows (can filter with WHERE, row-by-row, can roll back). TRUNCATE empties the entire table fast (no WHERE; SQLite doesn't have it — DELETE FROM table serves). DROP removes the table structure itself.</p></div>
+<div class="qa"><p class="q">19. Why can't you delete a parent row with children?</p><p class="a">The FK constraint would leave orphans. Options: delete children first (my delete_event loops event.bookings), or ON DELETE CASCADE to auto-delete children, or SET NULL.</p></div>
+<div class="qa"><p class="q">20. What is cascading / ON DELETE CASCADE?</p><p class="a">FK rule: when the parent row is deleted, children are automatically deleted (or SET NULL etc.). SQLAlchemy: cascade='all, delete' on the relationship. I cascade manually in the route so the logic is visible.</p></div>
+
+<h2>SQL language</h2>
+<div class="qa"><p class="q">21. What is CRUD in SQL?</p><p class="a">INSERT (Create), SELECT (Read), UPDATE, DELETE.</p></div>
+<div class="qa"><p class="q">22. Select everything from user table?</p><p class="a"><code>SELECT * FROM user;</code></p></div>
+<div class="qa"><p class="q">23. Names starting with S? (asked verbatim, repeatedly)</p><p class="a"><code>SELECT * FROM user WHERE name LIKE 'S%';</code> — % matches anything; '%S' = ending with S; '%S%' = containing S.</p></div>
+<div class="qa"><p class="q">24. LIKE vs ILIKE?</p><p class="a">LIKE is case-sensitive (in most DBs), ILIKE case-insensitive. SQLAlchemy's .ilike() gives case-insensitive matching portably — my searches use it.</p></div>
+<div class="qa"><p class="q">25. Insert a row?</p><p class="a"><code>INSERT INTO event (name, location, available_slots) VALUES ('Music Night', 'Nepal', 10);</code></p></div>
+<div class="qa"><p class="q">26. Update a value?</p><p class="a"><code>UPDATE event SET available_slots = 9 WHERE id = 1;</code> — omit WHERE and EVERY row updates (classic trap answer).</p></div>
+<div class="qa"><p class="q">27. Delete all users? What if FK constraint?</p><p class="a"><code>DELETE FROM user;</code> — errors if bookings still reference users (FK constraint). Delete bookings first: real viva moment from the sheet.</p></div>
+<div class="qa"><p class="q">28. Count rows? Filter + count?</p><p class="a"><code>SELECT COUNT(*) FROM booking;</code> / <code>SELECT COUNT(*) FROM booking WHERE status='Booked';</code></p></div>
+<div class="qa"><p class="q">29. What is a JOIN?</p><p class="a">Combining rows of two tables on a matching column: <code>SELECT b.id, u.name, t.name FROM booking b JOIN user u ON b.user_id=u.id JOIN event t ON b.event_id=t.id;</code> — the ORM does this for me via relationships (b.user.name).</p></div>
+<div class="qa"><p class="q">30. ORDER BY / LIMIT?</p><p class="a"><code>SELECT * FROM event ORDER BY name LIMIT 5;</code> ORM: <code>Event.query.order_by(Event.name).limit(5).all()</code></p></div>
+<div class="qa"><p class="q">31. Why is SQL so verbose? (odd but real question)</p><p class="a">It's declarative English-like by design (1970s goal: non-programmers querying data) — you say WHAT you want, the engine decides HOW. The ORM hides that verbosity behind Python.</p></div>
+<div class="qa"><p class="q">32. What is SQL injection? Are you protected?</p><p class="a">Attack where user input is pasted into SQL text ("'; DROP TABLE user; --"). The ORM sends parameters separately from the query (parameterized queries), so input is data, never code. Plus Jinja autoescaping covers XSS on output.</p></div>
+
+<h2>SQLAlchemy / ORM</h2>
+<div class="qa"><p class="q">33. What is an ORM? Advantages/disadvantages?</p><p class="a">Object-Relational Mapper: classes↔tables, objects↔rows, attributes↔columns; you write Python, it writes SQL. Pros: no hand SQL, injection-safe, DB-portable, objects fit app code. Cons: slight overhead, hides SQL, complex queries can fight it.</p></div>
+<div class="qa"><p class="q">34. Which ORM? Is SQLAlchemy() a class or function?</p><p class="a">SQLAlchemy via the Flask-SQLAlchemy extension. It's a class — db = SQLAlchemy() instantiates it; db is my handle to Model, Column, session.</p></div>
+<div class="qa"><p class="q">35. What is db.Model?</p><p class="a">The declarative base class; inheriting it maps my class to a table (name = class name lowercased) and grants .query and session powers.</p></div>
+<div class="qa"><p class="q">36. Where is the database created in your code?</p><p class="a">Config line SQLALCHEMY_DATABASE_URI names the file; db.init_app(app) binds SQLAlchemy to Flask; db.create_all() inside app context creates tables from the models; setup_database() also seeds the admin. Programmatically end to end — no DB Browser.</p></div>
+<div class="qa"><p class="q">37. What is db.session? Why commit?</p><p class="a">Transaction staging area. add()/delete() and attribute changes accumulate; commit() writes them atomically; rollback() discards. No commit = nothing persists.</p></div>
+<div class="qa"><p class="q">38. get vs get_or_404 vs filter_by().first()?</p><p class="a">get(pk): by primary key, None if absent. get_or_404: same but aborts with a 404 page — my edit/delete routes use it so bad IDs can't crash. filter_by(...).first(): first row matching conditions, None if none.</p></div>
+<div class="qa"><p class="q">39. filter_by vs filter?</p><p class="a">filter_by: keyword equality only (status='Open'). filter: full expressions (Event.available_slots &gt; 0, .ilike(), &amp; combinations).</p></div>
+<div class="qa"><p class="q">40. How do you search case-insensitively in your app?</p><p class="a"><code>Event.query.filter(Event.location.ilike('%' + q + '%'))</code> — substring, any case. Used in admin search and user location filter.</p></div>
+<div class="qa"><p class="q">41. Write the ORM query: all open events with slots left.</p><p class="a"><code>Event.query.filter(Event.status == 'Open', Event.available_slots &gt; 0).all()</code></p></div>
+<div class="qa"><p class="q">42. Write the ORM insert: add a user (real live task).</p><p class="a"><code>u = User(username='x', password_hash=generate_password_hash('p'), name='X', role='user')</code> then <code>db.session.add(u); db.session.commit()</code></p></div>
+<div class="qa"><p class="q">43. Raw SQL equivalent of Event.query.filter_by(status='Open').all()?</p><p class="a"><code>SELECT * FROM event WHERE status = 'Open';</code> (Proctors ask "what SQL does this line produce?")</p></div>
+<div class="qa"><p class="q">44. What is db.relationship? Is it a column?</p><p class="a">Not a column — a Python-side navigation property built on the FK: event.bookings gives the related Booking objects without writing a join.</p></div>
+<div class="qa"><p class="q">45. What is backref? backref vs back_populates?</p><p class="a">backref auto-creates the reverse attribute: relationship on User with backref='user' gives every Booking a .user. back_populates does the same but declared explicitly on both sides. backref = less code (mine); back_populates = more explicit.</p></div>
+<div class="qa"><p class="q">46. What is lazy loading / lazy=True vs lazy='dynamic'?</p><p class="a">Related rows load only when accessed (default True/'select') — event.bookings triggers its query at access time. 'dynamic' returns a query object you can filter further before loading. Opposite: eager loading fetches upfront via join.</p></div>
+<div class="qa"><p class="q">47. What is uselist=False?</p><p class="a">Makes a relationship return a single object instead of a list — how User↔StaffProfile becomes one-to-one.</p></div>
+<div class="qa"><p class="q">48. Why is there both a staff_id column and a staff backref on Event?</p><p class="a">staff_id is the actual FK stored in the table; event.staff is the ORM convenience giving the full User object (event.staff.name in my templates). Column = data, relationship = navigation.</p></div>
+<div class="qa"><p class="q">49. You changed a model but the DB didn't change — why?</p><p class="a">create_all only creates missing tables; it never ALTERs existing ones. Dev fix: delete instance/eventhub.db and restart (data lost). Production fix: migrations (Flask-Migrate/Alembic).</p></div>
+<div class="qa"><p class="q">50. How would you view the data directly?</p><p class="a">DB Browser for SQLite opening instance/eventhub.db (read/verify only — creation must stay programmatic), or python: sqlite3 CLI, or flask shell with User.query.all().</p></div>
+
+<div class="pager">
+    <a href="qa-flask-jinja.html">← Prev</a>
+    <a href="index.html">⌂ Home</a>
+    <a href="qa-http-api.html">Next: Q&amp;A HTTP/REST →</a>
+</div>
+</div>
+</body>
+</html>

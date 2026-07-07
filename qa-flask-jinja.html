@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Q&amp;A: Flask &amp; Jinja</title>
+<link rel="icon" type="image/png" href="icon.png">
+<link rel="stylesheet" href="style.css">
+<script>(function(){var t=localStorage.getItem("mad1-theme");if(location.hash==="#force-dark")t="dark";if(location.hash==="#force-light")t="light";if(t==="dark"||(!t&&window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches))document.documentElement.setAttribute("data-theme","dark");})();</script>
+<script src="app.js" defer></script>
+</head>
+<body>
+<div class="topnav"><a href="index.html">🏔️ Home</a></div>
+<div class="wrap">
+
+<h1>Q&amp;A: Flask &amp; Jinja2 (45 questions)</h1>
+
+<h2>Flask basics</h2>
+<div class="qa"><p class="q">1. What is Flask? Advantages?</p><p class="a">A lightweight ("micro") Python web framework mapping URLs to functions. Advantages: minimal and easy to learn, flexible (choose your own pieces), built-in dev server + debugger, Jinja2 included, huge extension ecosystem. Disadvantage: fewer batteries included than Django; you assemble more yourself.</p></div>
+<div class="qa"><p class="q">2. Flask vs Django?</p><p class="a">Flask: micro, unopinionated, pick your own ORM/auth. Django: full-featured (admin panel, ORM, auth built in), more structure, heavier. Flask suits small/medium apps and learning.</p></div>
+<div class="qa"><p class="q">3. What does app = Flask(__name__) do?</p><p class="a">Creates the application object. __name__ (the module's name) lets Flask locate the templates/ and static/ folders relative to the file.</p></div>
+<div class="qa"><p class="q">4. What is @app.route and why is it needed?</p><p class="a">A decorator registering a URL rule: "requests for this path call this function". Without it Flask has no idea which function serves which URL — the function would never run.</p></div>
+<div class="qa"><p class="q">5. What is a view function / controller?</p><p class="a">The function under @app.route — receives the request, runs logic (queries models), returns a response (usually render_template or redirect). In MVC terms these are my controllers.</p></div>
+<div class="qa"><p class="q">6. Default port? Change it? Change host?</p><p class="a">5000. <code>app.run(port=8080)</code>. <code>host='0.0.0.0'</code> would accept connections from other machines on the network (default 127.0.0.1 = own machine only).</p></div>
+<div class="qa"><p class="q">7. What is debug=True? Production?</p><p class="a">Auto-restarts the server on code changes + interactive error pages with tracebacks. Must be OFF in production — the debugger can execute arbitrary code and leaks internals.</p></div>
+<div class="qa"><p class="q">8. What can a Flask route return? Can it return a boolean?</p><p class="a">String, rendered template, redirect, a dict/list (auto-converted to JSON), or a (body, status_code) tuple. A bare boolean raises TypeError — wrap it: str(True) or jsonify(ok=True).</p></div>
+<div class="qa"><p class="q">9. What is a dynamic route?</p><p class="a">URL with a variable part: <code>@app.route('/event/&lt;int:event_id&gt;')</code> — Flask converts the URL segment and passes it as the function argument. int: is a converter; without it you get a string.</p></div>
+<div class="qa"><p class="q">10. What happens with two routes for the same URL?</p><p class="a">First registered wins for matching; identical rule + endpoint raises an error. Also: one function can have multiple @app.route decorators stacked.</p></div>
+<div class="qa"><p class="q">11. What is the request object?</p><p class="a">Flask's per-request bundle of incoming data: request.method, request.form (POST body), request.args (URL query), request.files. Imported from flask; usable inside routes only.</p></div>
+<div class="qa"><p class="q">12. request.form vs request.args?</p><p class="a">form = data from a POST body (login, register, booking). args = data from the URL query string ?q=... (my search/filter forms which use GET).</p></div>
+<div class="qa"><p class="q">13. Why methods=['GET','POST'] on some routes?</p><p class="a">Routes accept only GET by default. Form pages need both: GET shows the empty form, POST processes the submitted data. POST to a GET-only route → 405 Method Not Allowed.</p></div>
+<div class="qa"><p class="q">14. redirect vs render_template vs url_for?</p><p class="a">render_template: fill a Jinja file with data, return HTML now. redirect: return a 302 telling the browser to request a different URL. url_for: build a URL string from a FUNCTION name (takes the endpoint name, e.g. url_for('login') → '/login'). Combo: redirect(url_for('dashboard')).</p></div>
+<div class="qa"><p class="q">15. Why redirect after form POST?</p><p class="a">Post/Redirect/Get pattern: refreshing after a direct POST response resubmits the form (duplicate booking). Redirect makes the browser land on a clean GET.</p></div>
+<div class="qa"><p class="q">16. What is flash()? How is it shown?</p><p class="a">Stores a one-time message in the session; base.html loops get_flashed_messages() into Bootstrap alerts; messages disappear once displayed. Requires SECRET_KEY because it rides on the signed session.</p></div>
+<div class="qa"><p class="q">17. What is the SECRET_KEY? What breaks without it?</p><p class="a">Key used to cryptographically sign the session cookie. Without it, using session or flash raises RuntimeError. Change it and all logged-in sessions become invalid.</p></div>
+<div class="qa"><p class="q">18. What is the session? Where is it stored?</p><p class="a">Per-visitor dict surviving across requests. Flask stores it INSIDE a signed cookie in the browser (client-side session) — readable if decoded, but not forgeable without the secret key. I keep user_id and role in it.</p></div>
+<div class="qa"><p class="q">19. Cookie vs session?</p><p class="a">Cookie: raw browser-side storage sent with every request. Session: the logical per-user data; Flask implements it via a signed cookie. Logout = session.clear().</p></div>
+<div class="qa"><p class="q">20. How do users stay logged in "for so long" on real apps?</p><p class="a">Persistent cookies with long expiry (session.permanent in Flask) or refresh tokens. My session cookie is a browser-session cookie — closes with the browser by default.</p></div>
+<div class="qa"><p class="q">21. Application context vs request context?</p><p class="a">App context = app-level things (config, db) active; request context = one specific request's data (request, session). Flask pushes both automatically per request; outside a request (my setup_database()) I push the app context manually: <code>with app.app_context():</code>.</p></div>
+<div class="qa"><p class="q">22. What are Flask blueprints?</p><p class="a">A way to split routes into modular groups (e.g. admin_bp, user_bp) registered onto the app — for organizing big projects. Mine is small enough that all routes live in app.py, deliberately.</p></div>
+<div class="qa"><p class="q">23. What is Flask-Login / UserMixin? Why didn't you use it?</p><p class="a">Extension automating sessions: login_user(), @login_required, current_user; UserMixin adds the methods it needs to your model. It's an optional milestone — I implemented sessions directly to show I understand the mechanism it abstracts.</p></div>
+<div class="qa"><p class="q">24. What is WSGI?</p><p class="a">Web Server Gateway Interface — the standard connecting Python apps to web servers. Flask is a WSGI app; the dev server speaks it; production uses gunicorn/waitress.</p></div>
+<div class="qa"><p class="q">25. Status codes you see in the Flask terminal?</p><p class="a">200 page served, 302 my redirects, 304 browser cache for static files, 404 wrong URL / get_or_404, 405 wrong method, 500 my code crashed.</p></div>
+<div class="qa"><p class="q">26. How would you return JSON / build an API in Flask?</p><p class="a">Return a dict — Flask jsonifies it: <code>return {'name': event.name, 'slots': event.available_slots}</code>. A REST API = routes like /api/events with GET/POST/PUT/DELETE methods returning JSON instead of HTML.</p></div>
+<div class="qa"><p class="q">27. Difference between an API and a controller?</p><p class="a">Both are routes; a controller returns rendered HTML for humans, an API endpoint returns data (JSON) for programs. Same Flask machinery, different response type.</p></div>
+<div class="qa"><p class="q">28. Where do static files go? How are they linked?</p><p class="a">static/ folder; linked with <code>url_for('static', filename='style.css')</code> — Flask serves them at /static/... automatically.</p></div>
+<div class="qa"><p class="q">29. Why is your DB file inside an instance/ folder?</p><p class="a">Flask-SQLAlchemy resolves relative sqlite:/// paths against Flask's instance folder — a place for files that belong to this installation and shouldn't be in version control. To relocate it I'd put an absolute path in the URI.</p></div>
+<div class="qa"><p class="q">30. How does Flask handle routing internally (short)?</p><p class="a">Each @app.route registers a URL rule in a map; on each request Werkzeug matches the path + method against the map and calls the matched endpoint function.</p></div>
+
+<h2>Jinja2</h2>
+<div class="qa"><p class="q">31. What is Jinja2?</p><p class="a">Flask's template engine: HTML files with placeholders ({{ }}) and logic tags ({% %}) that Flask fills with Python data before sending.</p></div>
+<div class="qa"><p class="q">32. {{ }} vs {% %} vs {# #}?</p><p class="a">{{ expression }} outputs a value. {% statement %} is logic (if/for/extends/block). {# comment #} is a template comment, never rendered.</p></div>
+<div class="qa"><p class="q">33. Which function renders templates? Where must they live?</p><p class="a">render_template('file.html', name=value, ...) — extra kwargs become template variables. Files must be in the templates/ folder.</p></div>
+<div class="qa"><p class="q">34. Write a Jinja for loop (live-task certainty).</p><p class="a"><code>{% for event in events %} &lt;li&gt;{{ event.name }}&lt;/li&gt; {% endfor %}</code> — endfor is mandatory.</p></div>
+<div class="qa"><p class="q">35. Write a Jinja if/else.</p><p class="a"><code>{% if event.available_slots &gt; 0 %} Book {% else %} Full {% endif %}</code></p></div>
+<div class="qa"><p class="q">36. What is template inheritance? Show it.</p><p class="a">base.html defines the shared skeleton with {% block %} holes; children start with {% extends 'base.html' %} and fill the blocks. All 12 of my templates extend base.html (navbar, Bootstrap link, flash messages written once).</p></div>
+<div class="qa"><p class="q">37. What are Jinja filters?</p><p class="a">Value transformers applied with |: {{ bookings|length }}, {{ name|upper }}, {{ price|round(2) }}. length is the one my templates use.</p></div>
+<div class="qa"><p class="q">38. Can templates access the session?</p><p class="a">Yes — Flask injects session (also request, url_for, get_flashed_messages). My navbar switches links based on session.get('role').</p></div>
+<div class="qa"><p class="q">39. How does data get from a route into HTML?</p><p class="a">Controller queries the DB → passes objects to render_template as keyword arguments → template prints them with {{ }} / loops them with {% for %} → finished HTML goes to the browser. (This is "how frontend connects to backend" — say it as this pipeline.)</p></div>
+<div class="qa"><p class="q">40. What happens rendering an empty list into a table?</p><p class="a">The for loop body runs zero times — headers render, no rows. My templates show a "none yet" paragraph via {% if not bookings %}.</p></div>
+<div class="qa"><p class="q">41. How did you prefill the edit form?</p><p class="a">value="{{ event.name if event else '' }}" — one event_form.html serves both add (event=None) and edit (real object); selects mark the current choice with {{ 'selected' if event and event.category == level }}.</p></div>
+<div class="qa"><p class="q">42. Benefits of Jinja templating?</p><p class="a">Separation of logic and presentation (V of MVC), no HTML built by string concatenation, automatic HTML escaping (protects against XSS injection), inheritance kills duplication.</p></div>
+<div class="qa"><p class="q">43. What is autoescaping?</p><p class="a">Jinja converts &lt;, &gt;, &amp; in variables to safe entities, so a user named "&lt;script&gt;" can't inject running code into my pages — cross-site scripting (XSS) protection for free.</p></div>
+<div class="qa"><p class="q">44. Loop with a condition: print list items longer than 3 chars.</p><p class="a"><code>{% for w in words %}{% if w|length &gt; 3 %}{{ w }}{% endif %}{% endfor %}</code></p></div>
+<div class="qa"><p class="q">45. Given [&lt;Spot 1&gt;,&lt;Spot 2&gt;…] with a flag, render conditionally (real past task).</p><p class="a">Pattern answer: <code>{% for s in spots %}{% if s.is_occupied %}&lt;span class="badge bg-danger"&gt;{{ s.id }}&lt;/span&gt;{% else %}&lt;span class="badge bg-success"&gt;{{ s.id }}&lt;/span&gt;{% endif %}{% endfor %}</code> — loop + if + attribute access covers every variant they ask.</p></div>
+
+<div class="pager">
+    <a href="qa-html-css.html">← Prev</a>
+    <a href="index.html">⌂ Home</a>
+    <a href="qa-database.html">Next: Q&amp;A Database →</a>
+</div>
+</div>
+</body>
+</html>

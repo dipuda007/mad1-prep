@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Q&amp;A: HTTP, REST &amp; Web Concepts</title>
+<link rel="icon" type="image/png" href="icon.png">
+<link rel="stylesheet" href="style.css">
+<script>(function(){var t=localStorage.getItem("mad1-theme");if(location.hash==="#force-dark")t="dark";if(location.hash==="#force-light")t="light";if(t==="dark"||(!t&&window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches))document.documentElement.setAttribute("data-theme","dark");})();</script>
+<script src="app.js" defer></script>
+</head>
+<body>
+<div class="topnav"><a href="index.html">🏔️ Home</a></div>
+<div class="wrap">
+
+<h1>Q&amp;A: HTTP, REST, MVC &amp; Web Concepts (46 questions)</h1>
+
+<h2>HTTP</h2>
+<div class="qa"><p class="q">1. What is HTTP?</p><p class="a">HyperText Transfer Protocol — the request/response language between browsers and servers. Text-based, stateless, runs over TCP (port 80; HTTPS 443).</p></div>
+<div class="qa"><p class="q">2. HTTP vs HTTPS — which is more secure and why?</p><p class="a">HTTPS = HTTP over TLS/SSL encryption: traffic can't be read or tampered with in transit, and certificates verify the server's identity. Local dev uses HTTP because traffic never leaves the machine.</p></div>
+<div class="qa"><p class="q">3. What does stateless mean?</p><p class="a">Each request is independent; the protocol carries no memory of previous requests. Login "memory" is added on top via cookies/sessions.</p></div>
+<div class="qa"><p class="q">4. Explain the request-response cycle.</p><p class="a">Browser builds a request (method, URL, headers, optional body) → server routes it to a handler (my Flask view function) → handler returns a response (status code, headers, body HTML/JSON) → browser renders it. Every click/submit repeats this.</p></div>
+<div class="qa"><p class="q">5. Name the HTTP methods.</p><p class="a">GET, POST, PUT, PATCH, DELETE (+ HEAD, OPTIONS). CRUD mapping: POST create, GET read, PUT/PATCH update, DELETE delete.</p></div>
+<div class="qa"><p class="q">6. GET vs POST (the #1 question)?</p><p class="a">GET: data in the URL query string, visible/bookmarkable/cacheable, length-limited, must not change server data. POST: data in the body, not shown in URL, no practical length limit, used for creating/changing data and credentials.</p></div>
+<div class="qa"><p class="q">7. Which sends more data — GET or POST?</p><p class="a">POST — the body has no practical size limit; URLs are limited (~2000 chars typical).</p></div>
+<div class="qa"><p class="q">8. Can GET do POST's work?</p><p class="a">Technically a server could change data on GET, but it violates HTTP semantics: GETs get cached, prefetched, crawled — data would change accidentally. Passwords would also land in URLs/history/logs. So: never.</p></div>
+<div class="qa"><p class="q">9. POST vs PUT? Can PUT create? Can you use PUT for a form?</p><p class="a">POST creates a new resource each time (not idempotent — twice = two records). PUT replaces/updates at a known URL and IS idempotent (twice = same result); it may create if the target doesn't exist. HTML forms only support GET/POST, so my updates go via POST; PUT would need JS/Postman.</p></div>
+<div class="qa"><p class="q">10. PUT vs PATCH?</p><p class="a">PUT replaces the whole resource; PATCH modifies only the sent fields.</p></div>
+<div class="qa"><p class="q">11. What is idempotent?</p><p class="a">Repeating the request leaves the same final state as doing it once. GET, PUT, DELETE are idempotent; POST is not.</p></div>
+<div class="qa"><p class="q">12. When is POST triggered in your app?</p><p class="a">Submitting any form with method="POST": register, login, profile save, event add/edit/delete, approve, blacklist, staff update, book, cancel.</p></div>
+<div class="qa"><p class="q">13. Status codes — groups and the ones you see?</p><p class="a">1xx info, 2xx success (200 OK, 201 Created), 3xx redirect (301 permanent, 302 my redirects, 304 cached), 4xx client error (400 bad request, 401 unauthenticated, 403 forbidden, 404 not found, 405 wrong method), 5xx server error (500 my bug, 501 not implemented, 503 unavailable).</p></div>
+<div class="qa"><p class="q">14. Why 302 in your terminal after login?</p><p class="a">redirect() returns 302 Found; the browser then GETs the target URL — so a successful login shows POST /login 302 followed by GET /admin 200.</p></div>
+<div class="qa"><p class="q">15. What is 304?</p><p class="a">Not Modified — the browser asked "has style.css changed?" and the server said "use your cached copy". Normal, not an error.</p></div>
+<div class="qa"><p class="q">16. Parts of a URL?</p><p class="a">protocol://host:port/path?query#fragment — http://127.0.0.1:5000/user?category=Easy. Query string carries GET form data as key=value&amp; pairs.</p></div>
+<div class="qa"><p class="q">17. What is localhost / 127.0.0.1?</p><p class="a">The loopback address — always this machine. Server and browser both on your laptop during development and the viva demo.</p></div>
+<div class="qa"><p class="q">18. What is a port?</p><p class="a">Numbered channel letting one machine run many network services: web 80/443, Flask dev 5000. host:port identifies exactly which program gets the request.</p></div>
+<div class="qa"><p class="q">19. What is DNS?</p><p class="a">Domain Name System — translates names (google.com) to IP addresses. Localhost skips it via the hosts file.</p></div>
+<div class="qa"><p class="q">20. Headers? Examples?</p><p class="a">Key-value metadata on requests/responses: Content-Type (text/html, application/json), Cookie / Set-Cookie (my session travels here), Location (redirect target), User-Agent.</p></div>
+<div class="qa"><p class="q">21. How is form data transported to the server?</p><p class="a">GET: appended to the URL as the query string. POST: in the request body as name=value pairs (Content-Type application/x-www-form-urlencoded). Flask parses them into request.args / request.form.</p></div>
+
+<h2>REST &amp; APIs</h2>
+<div class="qa"><p class="q">22. What is an API?</p><p class="a">Application Programming Interface — a contract for programs to talk to each other. Web API: URLs returning data (JSON) instead of pages.</p></div>
+<div class="qa"><p class="q">23. What is REST / a RESTful API?</p><p class="a">REpresentational State Transfer — design style: resources as nouns in URLs (/api/events/5), HTTP verbs as actions (GET read, POST create, PUT update, DELETE remove), stateless requests, JSON responses. RESTful = follows these conventions.</p></div>
+<div class="qa"><p class="q">24. What is JSON?</p><p class="a">JavaScript Object Notation — lightweight text data format of key-value pairs and lists: {"name": "Music Night", "slots": 10}. Looks like Python dicts; universal API format.</p></div>
+<div class="qa"><p class="q">25. Why no API in your project? How would you add one?</p><p class="a">APIs are an optional milestone; core spec wants server-rendered Jinja pages. To add: routes like @app.route('/api/events') returning dicts/lists (Flask auto-JSONs dicts), or Flask-RESTful with Resource classes; test with Postman or curl.</p></div>
+<div class="qa"><p class="q">26. Advantages/disadvantages of REST APIs?</p><p class="a">Pros: frontend-independent (same API serves web/mobile), stateless = scalable, standard verbs. Cons: needs multiple round trips for complex screens, versioning pain, overkill for a small server-rendered app.</p></div>
+<div class="qa"><p class="q">27. Can an API return a boolean?</p><p class="a">Not bare in Flask — wrap in JSON: return {'ok': True}. JSON itself supports true/false values.</p></div>
+<div class="qa"><p class="q">28. What is Postman / curl?</p><p class="a">Tools for sending arbitrary HTTP requests (any verb, headers, body) to test APIs without a browser.</p></div>
+<div class="qa"><p class="q">29. What is a webhook vs API? (occasional L2 stretch)</p><p class="a">API: you call them when you want data. Webhook: they call your URL when an event happens (push vs pull).</p></div>
+
+<h2>Architecture</h2>
+<div class="qa"><p class="q">30. What is MVC? Map it to your project.</p><p class="a">Model-View-Controller separation: Model = data layer (models.py), View = presentation (templates/), Controller = request logic (route functions in app.py). Flow: request → controller → queries model → passes data to view → HTML response.</p></div>
+<div class="qa"><p class="q">31. Why use MVC?</p><p class="a">Separation of concerns: change UI without touching data logic, test layers separately, standard structure others can navigate.</p></div>
+<div class="qa"><p class="q">32. Client-server vs distributed architecture?</p><p class="a">Client-server: central server, many clients — my app. Distributed: functionality/data spread across cooperating machines (microservices, blockchain). A distributed system has no single point of failure but far more complexity.</p></div>
+<div class="qa"><p class="q">33. 2-tier vs 3-tier?</p><p class="a">Tiers = separable layers. 2-tier: client ↔ database. 3-tier: presentation (browser) ↔ application (Flask) ↔ data (SQLite) — my app. MVC organizes the code; tiers describe the runtime layers.</p></div>
+<div class="qa"><p class="q">34. What is a single page application (SPA)?</p><p class="a">App loading one HTML page, then updating the DOM with JavaScript + API calls (React/Vue) — no full reloads. Mine is the opposite: multi-page app, every action returns fresh server-rendered HTML (JS is disallowed for core).</p></div>
+<div class="qa"><p class="q">35. Horizontal vs vertical scaling?</p><p class="a">Vertical: bigger machine (more RAM/CPU). Horizontal: more machines behind a load balancer. SQLite would be swapped for a server DB before scaling horizontally.</p></div>
+<div class="qa"><p class="q">36. What is scalability? Concurrency?</p><p class="a">Scalability: capacity to handle growth in users/data. Concurrency: multiple things happening at once — the Flask dev server is single-threaded-ish and SQLite locks on writes: fine locally, replaced in production.</p></div>
+<div class="qa"><p class="q">37. What is caching?</p><p class="a">Storing results to avoid recomputing/refetching — browser caches static files (the 304s), servers cache pages/queries, CDNs cache globally.</p></div>
+<div class="qa"><p class="q">38. Frontend vs backend?</p><p class="a">Frontend: what runs in the browser — HTML/CSS (+ JS normally). Backend: server-side logic + database — Flask/SQLite. They meet at the HTTP request.</p></div>
+
+<h2>Security &amp; validation</h2>
+<div class="qa"><p class="q">39. Authentication vs authorization (THE most-asked question)?</p><p class="a">Authentication: proving WHO you are — my login's check_password_hash. Authorization: what you're ALLOWED to do — my role checks (user.role != 'admin' → redirect) and ownership checks (event.staff_id != user.id). Point to both blocks in code.</p></div>
+<div class="qa"><p class="q">40. What security mechanisms does your app have?</p><p class="a">Hashed+salted passwords (werkzeug), signed session cookie (SECRET_KEY), role checks on every route, ownership checks (staff/own bookings), staff approval gate, blacklist gate at login, ORM = SQL-injection safe, Jinja autoescaping = XSS-safe, POST for all state changes.</p></div>
+<div class="qa"><p class="q">41. Frontend vs backend validation — which matters more?</p><p class="a">Frontend (required, type=number, min): instant UX, but bypassable. Backend (my status/slots/duplicate guards, username-taken check): authoritative — requests can be forged, so the server must re-check everything. Backend wins; have both.</p></div>
+<div class="qa"><p class="q">42. What validations exist in your project?</p><p class="a">Frontend: required fields, number min=0, date pickers, dropdowns constraining values. Backend: unique username, wrong-password rejection, blacklist/approval gates, event Open check, slots &gt; 0 check, duplicate-booking check, staff-ownership check, status whitelist, int() conversions.</p></div>
+<div class="qa"><p class="q">43. What is hashing vs encryption? Why different hashes for the same password?</p><p class="a">Encryption reversible with a key; hashing one-way. Random salt is mixed per user and stored in the hash string — same password, different salt → different hash; defeats rainbow tables.</p></div>
+<div class="qa"><p class="q">44. What is XSS / CSRF (stretch questions)?</p><p class="a">XSS: injecting scripts into pages viewed by others — Jinja autoescaping defends. CSRF: tricking a logged-in browser into submitting a forged request — defended by CSRF tokens (Flask-WTF adds them); my simple app relies on session checks, and I can name the token approach as the improvement.</p></div>
+<div class="qa"><p class="q">45. If a user reports a bug, how do you help them? (real question)</p><p class="a">Reproduce it: get steps/screenshot, run the same flow locally, watch the terminal traceback and status codes, check the DB state, fix, test the flow again, deploy. Methodical answer &gt; specific answer here.</p></div>
+<div class="qa"><p class="q">46. What are cookies used for besides sessions?</p><p class="a">Preferences (theme/language), analytics/tracking, "remember me" tokens. Stored per-domain, sent automatically with each request to that domain, size-limited (~4KB).</p></div>
+
+<div class="pager">
+    <a href="qa-database.html">← Prev</a>
+    <a href="index.html">⌂ Home</a>
+    <a href="qa-git.html">Next: Q&amp;A Git →</a>
+</div>
+</div>
+</body>
+</html>

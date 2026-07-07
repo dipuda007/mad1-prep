@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lesson 21: Final Submission</title>
+<link rel="icon" type="image/png" href="icon.png">
+<link rel="stylesheet" href="style.css">
+<script>(function(){var t=localStorage.getItem("mad1-theme");if(location.hash==="#force-dark")t="dark";if(location.hash==="#force-light")t="light";if(t==="dark"||(!t&&window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches))document.documentElement.setAttribute("data-theme","dark");})();</script>
+<script src="app.js" defer></script>
+</head>
+<body>
+<div class="topnav"><a href="index.html">🏔️ Home</a></div>
+<div class="wrap">
+
+<h1>Lesson 21: Final Submission</h1>
+<p><strong>Goal:</strong> zip + report + video, submitted right the FIRST time — you can submit
+only once.</p>
+
+<h2>Deadlines &amp; bonus</h2>
+<table>
+<tr><th>Your situation</th><th>Deadline</th><th>Marks</th></tr>
+<tr><td>Theory completed before May 2026</td><td><strong>Tue 14 July 2026</strong></td><td>evaluated /100</td></tr>
+<tr><td>Theory registered in May 2026 term</td><td><strong>Sun 9 Aug 2026</strong></td><td>105 capped to 100 (bonus)</td></tr>
+</table>
+
+<h2>The zip — #1 cause of invalid submissions</h2>
+<p>Rules from the project document: a single zip; in the zip's root there is EXACTLY ONE folder
+(your project folder); everything lives inside it; at least one .py file present.</p>
+<pre><code>submission.zip
+└── eventhub-app/          ← ONE folder in the root, nothing else
+    ├── app.py
+    ├── models.py
+    ├── requirements.txt
+    ├── templates/ ...
+    └── static/ ...</code></pre>
+<p>Make it in PowerShell (from the folder ABOVE the project):</p>
+<pre><code>Compress-Archive -Path .\eventhub-app -DestinationPath .\submission.zip</code></pre>
+<div class="warn">Delete <code>instance/</code>, <code>__pycache__/</code> and any venv folder
+before zipping. Do NOT zip "the files" — zip the FOLDER, so the zip root contains the folder, not
+loose files. After uploading, download your own submission back from the portal and open it to
+verify. Use the validation Google Form on the portal (unlimited tries) BEFORE the one-shot real
+submission.</div>
+
+<h2>The report (3–5 pages, PDF/DOCX, separate field)</h2>
+<ol>
+<li>Student details (name, roll no 24f2008594, email).</li>
+<li>Project details: problem statement + how you approached it.</li>
+<li><strong>AI/LLM declaration — mandatory even if 0%.</strong> State the percentage and what for.
+Honest + modest is safe; "assistance is allowed if you can explain and modify the code yourself".</li>
+<li>Frameworks/libraries used: Flask, Jinja2, Flask-SQLAlchemy, SQLite, Bootstrap.</li>
+<li>ER diagram — draw your 4 tables + relations (paper photo or draw.io; Build 1 has the text
+version).</li>
+<li>API endpoints — "None; core requirements implemented with server-rendered templates."</li>
+<li>Drive link of the video (set: anyone with the link can view!).</li>
+</ol>
+
+<h2>The video (3–10 min)</h2>
+<p>Script (matches the advised structure): 30s intro (who you are, what the app is) → 30s approach
+(Flask+SQLite, MVC, 4 tables) → 90s+ demo: the Build 6 end-to-end story (admin creates event →
+staff approval flow → user books → overbooking blocked → history) → 30s anything extra. Record
+with screen share; camera feed optional but recommended. Upload to your student Drive, access:
+anyone with the link.</p>
+
+<h2>Pre-viva checksum drill (do this once now, once before viva)</h2>
+<pre><code>pip install checksumdir
+# check.py  (place NEXT TO the unzipped folder, not inside)
+import checksumdir
+hash = checksumdir.dirhash("eventhub-app")
+print("Directory Checksum:", hash)</code></pre>
+<p>At the viva you download your submission from the portal and either show the checksum matches
+or just run the downloaded copy directly. Practice: download → unzip → <code>pip install -r
+requirements.txt</code> → <code>python app.py</code> → running within 10 minutes. Rehearse until
+it's boring.</p>
+
+<h2>Final commit</h2>
+<pre><code>git add .
+git commit -m "Milestone-TMA Final-Submission"
+git push</code></pre>
+<p>(Exact message specified by the milestones doc.) Entire codebase must be on GitHub before you
+submit on the portal.</p>
+
+<div class="pager">
+    <a href="20-git-github.html">← Prev</a>
+    <a href="index.html">⌂ Home</a>
+    <a href="viva-guide.html">Next: Viva Guide →</a>
+</div>
+</div>
+</body>
+</html>

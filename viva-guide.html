@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Viva Guide</title>
+<link rel="icon" type="image/png" href="icon.png">
+<link rel="stylesheet" href="style.css">
+<script>(function(){var t=localStorage.getItem("mad1-theme");if(location.hash==="#force-dark")t="dark";if(location.hash==="#force-light")t="light";if(t==="dark"||(!t&&window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches))document.documentElement.setAttribute("data-theme","dark");})();</script>
+<script src="app.js" defer></script>
+</head>
+<body>
+<div class="topnav"><a href="index.html">🏔️ Home</a></div>
+<div class="wrap">
+
+<h1>Viva Guide — how it actually goes</h1>
+<p>Distilled from the official project document, the viva checklist, and ~85 pages of real student
+reports of past vivas.</p>
+
+<h2>The two levels</h2>
+<table>
+<tr><th></th><th>Level 1 (40%)</th><th>Level 2 (60%)</th></tr>
+<tr><td>Who</td><td>IITM viva team</td><td>industry experts / instructors</td></tr>
+<tr><td>Focus</td><td>does the app meet core requirements; is it YOUR work</td><td>depth: explain + modify code, course concepts</td></tr>
+<tr><td>Length</td><td>15–30 min</td><td>30–60 min</td></tr>
+<tr><td>Pass</td><td>20/40 (E grade); <strong>30/40 to unlock Level 2</strong></td><td>20/60</td></tr>
+<tr><td>Fail</td><td>&lt;20 → U grade, redo next term, no reattempt</td><td>&lt;20 → D grade</td></tr>
+</table>
+<p>Both passed → L1+L2 marks sum to your grade. Not booking a slot when eligible = U (L1) / E (L2).
+Rescheduling only for medical reasons with proof; your-side cancellation costs ₹1000.</p>
+
+<h2>The standard Level 1 script (from dozens of real reports)</h2>
+<ol>
+<li>Show student ID card (keep it open in a browser tab).</li>
+<li>Show GitHub repo with MADI-cs2003 as collaborator (keep the page open).</li>
+<li>Download YOUR submission from the portal live (or verify checksum) → unzip → run.
+<strong>Must be running within 10 minutes or you fail.</strong></li>
+<li>Demo all core functionality (use the Build 6 story — it covers every rubric point).</li>
+<li>1–2+ theory questions (the Q&amp;A pages here cover ~95% of what's ever asked).</li>
+<li>A live code change (see the Code Tasks page).</li>
+</ol>
+
+<h2>Camera setup (non-negotiable)</h2>
+<p>Join the meet from phone AND pc. Phone camera positioned to show your hands, face and laptop
+screen; one device muted. Set this up BEFORE the viva starts — setup time counts inside the
+10-minute rule. Join the link 10 minutes early. If the schedule email hasn't come, it arrives
+12–24h before the slot.</p>
+
+<h2>Have open before it starts</h2>
+<ul>
+<li>ID card (browser tab) · GitHub repo page · project submission portal page</li>
+<li>VS Code with nothing AI-related installed/visible — <strong>AI tools in the editor during viva
+= not allowed</strong></li>
+<li>A text file with your run commands (<code>pip install -r requirements.txt</code>,
+<code>python app.py</code>)</li>
+<li>Notepad — proctors often ask you to write routes/loops there</li>
+<li>Dependencies pre-installed; internet working (Bootstrap loads from CDN)</li>
+</ul>
+
+<h2>Malpractice — the real danger list</h2>
+<ul>
+<li><strong>Complex project + can't answer basics = flagged.</strong> This is why your app is
+deliberately simple. 56 students got U for exactly this; 45 got U in ALL courses + 2-term ban.</li>
+<li>Can't write simple logic or modify your own code when asked = flagged.</li>
+<li>Rude/argumentative with the examiner = removed + U. Stay polite even if they're wrong.</li>
+<li>Declared AI usage ≠ problem, IF you demonstrate understanding. Undeclared or ununderstood = problem.</li>
+<li>"Code was on another laptop" is explicitly not accepted — develop and viva on the SAME machine.</li>
+</ul>
+
+<h2>Winning behaviours (straight from student reports)</h2>
+<ul>
+<li><strong>Talk continuously while demoing.</strong> One student: "I was the one talking for 30
+of the 33 minutes — he only said Perfect." Narrate: "this is my login route, it checks the hash,
+then stores user_id in session…" The more you explain unprompted, the fewer questions come.</li>
+<li>Take a breath before answering; proctors consistently give time.</li>
+<li>If a change breaks, don't panic — restart the server first (fixes 90% of "my change isn't
+showing"), and remember a stale database is the other 10% (delete instance/eventhub.db).</li>
+<li>If you don't know, say what you DO know honestly. Bluffing invites deeper digging.</li>
+<li>At the end, ask for feedback — multiple reports say proctors respond warmly to it.</li>
+<li>If your proctor ID is shared in student groups, look up that proctor's past questions —
+"80% of questions repeat per proctor" per multiple reports. The Q&amp;A pages here cover the union
+of all of them anyway.</li>
+</ul>
+
+<h2>Your 60-second project pitch (memorize, it opens every viva)</h2>
+<p>"I built an eventHub demo application using Flask with Jinja2 templates, SQLite through the
+Flask-SQLAlchemy ORM, and Bootstrap for the UI — the mandated stack, MVC pattern: models.py is the
+Model, templates are the View, the routes in app.py are the Controllers. There are three roles.
+Admin is pre-created programmatically and manages events, approves staff, assigns them to events, can
+blacklist anyone, and sees every booking. Staff register but need approval; they manage only their
+assigned events — slots, status, participants. Users register, search open events by category and
+location, and book — with duplicate bookings and overbooking blocked in the backend. Booking
+history is never deleted; statuses track the full lifecycle."</p>
+
+<div class="pager">
+    <a href="21-submission.html">← Prev</a>
+    <a href="index.html">⌂ Home</a>
+    <a href="qa-python.html">Next: Q&amp;A Python →</a>
+</div>
+</div>
+</body>
+</html>

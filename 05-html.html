@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lesson 5: HTML</title>
+<link rel="icon" type="image/png" href="icon.png">
+<link rel="stylesheet" href="style.css">
+<script>(function(){var t=localStorage.getItem("mad1-theme");if(location.hash==="#force-dark")t="dark";if(location.hash==="#force-light")t="light";if(t==="dark"||(!t&&window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches))document.documentElement.setAttribute("data-theme","dark");})();</script>
+<script src="app.js" defer></script>
+</head>
+<body>
+<div class="topnav"><a href="index.html">🏔️ Home</a></div>
+<div class="wrap">
+
+<h1>Lesson 5: HTML — the skeleton of every page</h1>
+<p><strong>Goal:</strong> read/write basic HTML. Make a file <code>test.html</code> anywhere,
+double-click it to open in your browser. No server needed for plain HTML.</p>
+
+<h2>A complete minimal page</h2>
+<pre><code>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+    &lt;title&gt;My first page&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;h1&gt;Event-booking Management&lt;/h1&gt;
+    &lt;p&gt;Welcome to my app.&lt;/p&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+<ul>
+<li><code>&lt;!DOCTYPE html&gt;</code> — tells the browser "this is HTML5".</li>
+<li><code>&lt;head&gt;</code> — invisible metadata: title (browser tab text), CSS links.</li>
+<li><code>&lt;body&gt;</code> — everything visible.</li>
+<li>Tags open <code>&lt;p&gt;</code> and close <code>&lt;/p&gt;</code>.</li>
+</ul>
+
+<h2>The tags your project uses</h2>
+<table>
+<tr><th>Tag</th><th>Meaning</th></tr>
+<tr><td><code>&lt;h1&gt;…&lt;h6&gt;</code></td><td>headings, big → small</td></tr>
+<tr><td><code>&lt;p&gt;</code></td><td>paragraph</td></tr>
+<tr><td><code>&lt;a href="/login"&gt;Login&lt;/a&gt;</code></td><td>link</td></tr>
+<tr><td><code>&lt;div&gt;</code></td><td>generic box for grouping (block)</td></tr>
+<tr><td><code>&lt;span&gt;</code></td><td>generic inline piece of text</td></tr>
+<tr><td><code>&lt;table&gt; &lt;tr&gt; &lt;th&gt; &lt;td&gt;</code></td><td>table → row → header cell → data cell</td></tr>
+<tr><td><code>&lt;form&gt; &lt;input&gt; &lt;select&gt; &lt;button&gt;</code></td><td>forms (next section)</td></tr>
+<tr><td><code>&lt;img src="pic.png"&gt;</code></td><td>image (no closing tag needed)</td></tr>
+</table>
+
+<div class="viva">"Difference between block and inline elements?" — a <strong>block</strong> element
+(<code>div, p, h1, table, form</code>) starts on a new line and takes the full width. An
+<strong>inline</strong> element (<code>span, a, strong, img, input</code>) flows inside the line and
+only takes the width of its content.</div>
+
+<h2>Tables — you will write many</h2>
+<pre><code>&lt;table&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Event&lt;/th&gt;
+        &lt;th&gt;Slots&lt;/th&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;td&gt;Music Night&lt;/td&gt;
+        &lt;td&gt;10&lt;/td&gt;
+    &lt;/tr&gt;
+&lt;/table&gt;</code></pre>
+
+<h2>Forms — how users send data</h2>
+<pre><code>&lt;form method="POST" action="/login"&gt;
+    &lt;label&gt;Username&lt;/label&gt;
+    &lt;input type="text" name="username" required&gt;
+
+    &lt;label&gt;Password&lt;/label&gt;
+    &lt;input type="password" name="password" required&gt;
+
+    &lt;button type="submit"&gt;Login&lt;/button&gt;
+&lt;/form&gt;</code></pre>
+<ul>
+<li><code>method="POST"</code> — send data hidden in the request body (right for passwords / changes).</li>
+<li><code>action="/login"</code> — which URL receives the data.</li>
+<li><code>name="username"</code> — <strong>the key Python uses</strong>: <code>request.form['username']</code>.
+No name attribute → Flask receives nothing. #1 beginner bug.</li>
+<li><code>required</code> — browser refuses to submit if empty. This is <strong>HTML5 front-end validation</strong>.</li>
+</ul>
+
+<div class="viva">"What is <code>name</code> vs <code>id</code> in HTML?" — <code>name</code> is the
+key under which a form field's value is sent to the server. <code>id</code> is a unique label for
+the element inside the page, used by CSS (<code>#id</code>) or JavaScript; it is never sent with the
+form.</div>
+
+<p>Other input types you'll use: <code>type="number"</code>, <code>type="date"</code>, and dropdowns:</p>
+<pre><code>&lt;select name="category"&gt;
+    &lt;option value="Easy"&gt;Easy&lt;/option&gt;
+    &lt;option value="Hard"&gt;Hard&lt;/option&gt;
+&lt;/select&gt;</code></pre>
+
+<h2>Try it</h2>
+<p>Build a page with a heading, a 3-row table of events, and a form with one text input and a
+button. Open it in the browser.</p>
+
+<div class="pager">
+    <a href="04-python-3.html">← Prev</a>
+    <a href="index.html">⌂ Home</a>
+    <a href="06-css-bootstrap.html">Next: CSS &amp; Bootstrap →</a>
+</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Q&amp;A: HTML, CSS &amp; Bootstrap</title>
+<link rel="icon" type="image/png" href="icon.png">
+<link rel="stylesheet" href="style.css">
+<script>(function(){var t=localStorage.getItem("mad1-theme");if(location.hash==="#force-dark")t="dark";if(location.hash==="#force-light")t="light";if(t==="dark"||(!t&&window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches))document.documentElement.setAttribute("data-theme","dark");})();</script>
+<script src="app.js" defer></script>
+</head>
+<body>
+<div class="topnav"><a href="index.html">🏔️ Home</a></div>
+<div class="wrap">
+
+<h1>Q&amp;A: HTML, CSS &amp; Bootstrap (36 questions)</h1>
+
+<h2>HTML</h2>
+<div class="qa"><p class="q">1. What is HTML?</p><p class="a">HyperText Markup Language — defines the structure/content of web pages using tags. Not a programming language (no logic), a markup language.</p></div>
+<div class="qa"><p class="q">2. What does &lt;!DOCTYPE html&gt; do?</p><p class="a">Declares the document as HTML5 so browsers render in standards mode instead of legacy "quirks mode".</p></div>
+<div class="qa"><p class="q">3. What goes in &lt;head&gt; vs &lt;body&gt;?</p><p class="a">head: invisible metadata — title, charset, CSS links, viewport. body: everything rendered on screen.</p></div>
+<div class="qa"><p class="q">4. What is metadata in HTML? Where is it?</p><p class="a">Data about the page, in &lt;meta&gt; tags inside head: <code>charset="UTF-8"</code> (text encoding), <code>viewport</code> (mobile scaling), description, etc.</p></div>
+<div class="qa"><p class="q">5. Block vs inline elements?</p><p class="a">Block (div, p, h1, form, table): new line, full width. Inline (span, a, img, input, strong): flows within the line, content width only.</p></div>
+<div class="qa"><p class="q">6. div vs span?</p><p class="a">Both are meaningless generic containers for styling/grouping — div is block, span is inline.</p></div>
+<div class="qa"><p class="q">7. name vs id attribute?</p><p class="a">name = the key used when form data is sent to the server (request.form['name']). id = unique page-internal identifier for CSS/JS targeting; not submitted with forms.</p></div>
+<div class="qa"><p class="q">8. What is the action attribute of a form? And method?</p><p class="a">action = URL the data is sent to (defaults to the current URL if omitted). method = GET or POST — HTML forms support only these two verbs.</p></div>
+<div class="qa"><p class="q">9. Input types you used?</p><p class="a">text, password (masked), number (with min=), date (gives YYYY-MM-DD), plus select dropdowns and submit buttons.</p></div>
+<div class="qa"><p class="q">10. What is the required attribute?</p><p class="a">HTML5 frontend validation — browser blocks submitting an empty field. Convenience only; my backend still validates because requests can bypass the browser.</p></div>
+<div class="qa"><p class="q">11. How do you make a link? A table?</p><p class="a"><code>&lt;a href="/login"&gt;Login&lt;/a&gt;</code>. Table: &lt;table&gt; containing &lt;tr&gt; rows, with &lt;th&gt; header cells and &lt;td&gt; data cells.</p></div>
+<div class="qa"><p class="q">12. Cell padding vs cell spacing? (asked constantly)</p><p class="a">Cell padding = space INSIDE a cell, between its content and its border. Cell spacing = space BETWEEN neighbouring cells' borders. In modern CSS: padding on td vs border-spacing on table.</p></div>
+<div class="qa"><p class="q">13. How to add an image? Background image?</p><p class="a"><code>&lt;img src="{{ url_for('static', filename='pic.png') }}"&gt;</code>. Background: CSS <code>body { background-image: url('pic.jpg'); background-size: cover; }</code>. Image + gradient: <code>background-image: linear-gradient(rgba(0,0,0,.5), rgba(0,0,0,.5)), url('pic.jpg');</code></p></div>
+<div class="qa"><p class="q">14. What is the DOM? Which language manipulates it?</p><p class="a">Document Object Model — the browser's in-memory tree of the page's elements. JavaScript manipulates it (change text, hide elements) without reloading. My core app doesn't use JS, so pages update via fresh server-rendered HTML instead.</p></div>
+<div class="qa"><p class="q">15. Static vs dynamic pages?</p><p class="a">Static: same fixed HTML for everyone (this prep app!). Dynamic: HTML generated per request with data — every page of my project (Jinja fills in events/bookings from the DB).</p></div>
+<div class="qa"><p class="q">16. Can HTML alone send HTTP requests?</p><p class="a">Yes — links send GET, forms send GET or POST, and the browser requests images/CSS automatically. For PUT/DELETE you need JS or a tool like Postman.</p></div>
+
+<h2>CSS</h2>
+<div class="qa"><p class="q">17. What is CSS? Why "cascading"?</p><p class="a">Cascading Style Sheets — rules for how elements look. "Cascading" = when rules conflict, they resolve in a defined order: importance, specificity, then source order.</p></div>
+<div class="qa"><p class="q">18. Three ways to include CSS + priority order?</p><p class="a">Inline (style="..." on the tag) — highest priority; Internal (&lt;style&gt; block in head); External (.css file via &lt;link&gt;). Internal vs external have equal footing — specificity then last-loaded wins. My project: external (Bootstrap CDN + my static/style.css).</p></div>
+<div class="qa"><p class="q">19. Why does inline CSS beat the others?</p><p class="a">Highest specificity — it's attached directly to the element, so it overrides id, class and tag rules (only !important beats it).</p></div>
+<div class="qa"><p class="q">20. Selector types?</p><p class="a">Tag <code>h1 {}</code>, class <code>.card {}</code> (many elements), id <code>#logo {}</code> (one element). Specificity: id &gt; class &gt; tag.</p></div>
+<div class="qa"><p class="q">21. How to center text / an element?</p><p class="a">Text: <code>text-align: center;</code> (Bootstrap: class text-center). Block element: <code>margin: 0 auto;</code> with a width (Bootstrap: mx-auto), or flexbox <code>display:flex; justify-content:center;</code> (Bootstrap: d-flex justify-content-center).</p></div>
+<div class="qa"><p class="q">22. How to change background/font colour?</p><p class="a"><code>body { background-color: #f0f5f1; color: #222; }</code> — my style.css does exactly the background one. Live task favourite: find the element, add the rule in static/style.css, hard-refresh (Ctrl+F5).</p></div>
+<div class="qa"><p class="q">23. Padding vs margin?</p><p class="a">Padding = space inside the border (between border and content). Margin = space outside the border (between this element and neighbours). Box model order: content → padding → border → margin.</p></div>
+<div class="qa"><p class="q">24. What is the CSS box model?</p><p class="a">Every element is a rectangle of content wrapped by padding, then border, then margin. Explains all spacing questions.</p></div>
+<div class="qa"><p class="q">25. What is !important?</p><p class="a">Suffix forcing a rule to win over normal specificity: <code>color: red !important;</code>. Last resort — breaks the natural cascade.</p></div>
+<div class="qa"><p class="q">26. What is a pseudo-class like :hover?</p><p class="a">Styles for a state: <code>a:hover { color: green; }</code> applies while the mouse is over. Bootstrap's table-hover uses this.</p></div>
+
+<h2>Bootstrap</h2>
+<div class="qa"><p class="q">27. What is Bootstrap? Why use it?</p><p class="a">A CSS framework of ready-made classes (buttons, cards, grid, navbar). Fast, consistent, responsive out of the box; the only CSS framework the project permits.</p></div>
+<div class="qa"><p class="q">28. How did you include Bootstrap?</p><p class="a">One &lt;link&gt; tag in base.html loading bootstrap.min.css from the jsDelivr CDN — inherited by all pages through template inheritance.</p></div>
+<div class="qa"><p class="q">29. What is a CDN?</p><p class="a">Content Delivery Network — distributed servers hosting common files close to users. Browser downloads Bootstrap from the CDN instead of my server. Needs internet; offline alternative is downloading the css into static/.</p></div>
+<div class="qa"><p class="q">30. How does the Bootstrap grid work?</p><p class="a">A row is divided into 12 columns. <code>col-md-3</code> = span 3 of 12 (quarter width) on medium screens and up, stacking to full width below — that's what makes my dashboard responsive.</p></div>
+<div class="qa"><p class="q">31. What does "responsive" mean?</p><p class="a">Layout adapts to screen size (phone/tablet/desktop). Achieved via the viewport meta tag + Bootstrap's grid breakpoints (media queries under the hood).</p></div>
+<div class="qa"><p class="q">32. What is a class in Bootstrap, e.g. btn btn-success?</p><p class="a">Pre-written CSS classes: btn gives button shape/padding; btn-success colours it green; btn-sm shrinks it. Multiple classes combine, space-separated.</p></div>
+<div class="qa"><p class="q">33. Which Bootstrap components did you use?</p><p class="a">Navbar, container, grid (row/col), cards, tables, buttons, form controls, alerts (flash messages), badges (status labels), spacing utilities (mt-4, mb-3…).</p></div>
+<div class="qa"><p class="q">34. What is bootstrap.min.css — why "min"?</p><p class="a">Minified: whitespace/names compressed for smaller download; identical rules, just unreadable.</p></div>
+<div class="qa"><p class="q">35. Move an element to the right / navbar links to the end? (live-task classic)</p><p class="a">Bootstrap: add <code>ms-auto</code> (margin-start auto pushes the element right — my navbar uses it). Raw CSS: <code>margin-left: auto;</code> in a flex container, or float: right.</p></div>
+<div class="qa"><p class="q">36. Change button position from bottom to top of a list? (live-task classic)</p><p class="a">It's just HTML order — cut the button's HTML and paste it above the table/list in the template. Restart not needed; refresh the page (templates reload in debug mode).</p></div>
+
+<div class="pager">
+    <a href="qa-python.html">← Prev</a>
+    <a href="index.html">⌂ Home</a>
+    <a href="qa-flask-jinja.html">Next: Q&amp;A Flask/Jinja →</a>
+</div>
+</div>
+</body>
+</html>

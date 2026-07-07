@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Q&amp;A: Python</title>
+<link rel="icon" type="image/png" href="icon.png">
+<link rel="stylesheet" href="style.css">
+<script>(function(){var t=localStorage.getItem("mad1-theme");if(location.hash==="#force-dark")t="dark";if(location.hash==="#force-light")t="light";if(t==="dark"||(!t&&window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches))document.documentElement.setAttribute("data-theme","dark");})();</script>
+<script src="app.js" defer></script>
+</head>
+<body>
+<div class="topnav"><a href="index.html">🏔️ Home</a></div>
+<div class="wrap">
+
+<h1>Q&amp;A: Python (38 questions)</h1>
+<p>Every one of these has been asked in a real MAD-1 viva or is one step away from one that has.</p>
+
+<div class="qa"><p class="q">1. Difference between a list and a tuple?</p><p class="a">List <code>[1,2,3]</code> is mutable — you can append, remove, change items. Tuple <code>(1,2,3)</code> is immutable — fixed after creation. Tuples are slightly faster and usable as dictionary keys.</p></div>
+<div class="qa"><p class="q">2. What does mutable/immutable mean?</p><p class="a">Mutable = can be changed in place after creation (list, dict, set). Immutable = cannot (int, float, str, tuple, bool). "Changing" a string actually creates a new string.</p></div>
+<div class="qa"><p class="q">3. Difference between a list and an array?</p><p class="a">A Python list holds items of any mixed types and resizes freely. An array (array module / NumPy) holds items of one fixed type, stored compactly, faster for math.</p></div>
+<div class="qa"><p class="q">4. What is a dictionary?</p><p class="a">Key→value mapping: <code>{"name": "Music Night", "slots": 10}</code>. Lookup by key, keys unique. <code>request.form</code> behaves like one.</p></div>
+<div class="qa"><p class="q">5. List vs set?</p><p class="a">List: ordered, allows duplicates, index access. Set: unordered, unique elements only, fast membership tests.</p></div>
+<div class="qa"><p class="q">6. What is an f-string?</p><p class="a">String with embedded expressions: <code>f"Event {name} has {slots} slots"</code> — the {} parts are evaluated and inserted.</p></div>
+<div class="qa"><p class="q">7. == vs = ?</p><p class="a"><code>=</code> assigns a value to a name; <code>==</code> compares two values and returns True/False.</p></div>
+<div class="qa"><p class="q">8. What is a function? How do you define one?</p><p class="a">A reusable named block taking inputs and optionally returning a value. <code>def add(a, b): return a + b</code>. Every Flask route is a function.</p></div>
+<div class="qa"><p class="q">9. What is a lambda function?</p><p class="a">A small anonymous one-expression function: <code>square = lambda x: x*x</code>. Used where a short throwaway function is needed, e.g. as a sort key: <code>sorted(events, key=lambda t: t.name)</code>.</p></div>
+<div class="qa"><p class="q">10. What is a decorator?</p><p class="a">A function that wraps another function to add behaviour without editing it, applied with @. In my project <code>@app.route('/login')</code> is a decorator that registers the function as the handler for that URL.</p></div>
+<div class="qa"><p class="q">11. What is a class? What is an object?</p><p class="a">A class is a blueprint describing data (attributes) and behaviour (methods); an object/instance is one concrete item made from it. <code>class Event(db.Model)</code> is the blueprint; each event row I load is an object.</p></div>
+<div class="qa"><p class="q">12. What is __init__?</p><p class="a">The constructor — the method Python calls automatically when creating an object, used to set initial attribute values. <code>self</code> refers to the object being created.</p></div>
+<div class="qa"><p class="q">13. What is self?</p><p class="a">The first parameter of instance methods — the object itself. <code>self.name</code> means "this particular object's name".</p></div>
+<div class="qa"><p class="q">14. What is inheritance? Where in your project?</p><p class="a">A class receiving the attributes/methods of a parent class. All my models inherit from <code>db.Model</code> — that's what gives them .query, saving, and table mapping. (Template inheritance in Jinja is the same idea for HTML.)</p></div>
+<div class="qa"><p class="q">15. Four pillars of OOP?</p><p class="a">Encapsulation (data + methods bundled, internals hidden), Inheritance (reuse via parent classes), Polymorphism (same interface, different behaviour — e.g. len() on list or string), Abstraction (expose what, hide how — Event.query.all() hides all SQL).</p></div>
+<div class="qa"><p class="q">16. What is a module / import?</p><p class="a">A module is any .py file; import loads it so you can use its names. <code>from models import db, User</code> pulls specific names from my own models.py.</p></div>
+<div class="qa"><p class="q">17. What does if __name__ == '__main__' do?</p><p class="a">True only when the file is run directly (<code>python app.py</code>), not when imported. I use it so the server starts only on direct run.</p></div>
+<div class="qa"><p class="q">18. What is an exception? try/except?</p><p class="a">An error at runtime (ValueError, KeyError, ZeroDivisionError…). <code>try:</code> runs risky code; matching <code>except:</code> block handles the failure instead of crashing.</p></div>
+<div class="qa"><p class="q">19. Common exception types?</p><p class="a">ValueError (int("abc")), TypeError (wrong type operation), KeyError (missing dict key — e.g. request.form without that field), IndexError (list[99]), ZeroDivisionError, FileNotFoundError.</p></div>
+<div class="qa"><p class="q">20. range(5) gives what?</p><p class="a">0,1,2,3,4 — start at 0, stop BEFORE 5. range(1,6) gives 1–5.</p></div>
+<div class="qa"><p class="q">21. How do you read the 3rd item of a list?</p><p class="a"><code>items[2]</code> — indexing starts at 0. Negative indexes count from the end: items[-1] is the last.</p></div>
+<div class="qa"><p class="q">22. What is None?</p><p class="a">Python's "no value". <code>Event.query.get(999)</code> returns None when no row exists — that's why I check <code>if not user</code>.</p></div>
+<div class="qa"><p class="q">23. int('5') vs str(5)?</p><p class="a">Type conversion: int() text→number (form data arrives as text), str() number→text (needed to return numbers from Flask routes).</p></div>
+<div class="qa"><p class="q">24. What does len() do? What can it take?</p><p class="a">Number of items — works on strings (characters), lists, dicts (keys), tuples. In Jinja the equivalent filter is <code>|length</code>.</p></div>
+<div class="qa"><p class="q">25. append() vs extend()?</p><p class="a">append adds ONE item (possibly a whole list as one element); extend adds each element of another iterable individually.</p></div>
+<div class="qa"><p class="q">26. How to check if something is in a list?</p><p class="a"><code>if x in mylist:</code> — also works for keys in dicts and substrings in strings.</p></div>
+<div class="qa"><p class="q">27. What is a virtual environment?</p><p class="a">An isolated per-project set of installed packages, so projects can use different versions. <code>python -m venv venv</code>, activate with <code>venv\Scripts\activate</code> on Windows. I installed globally for viva reliability — the official checklist permits this.</p></div>
+<div class="qa"><p class="q">28. What is pip? What is requirements.txt?</p><p class="a">pip is Python's package installer. requirements.txt lists the project's dependencies so <code>pip install -r requirements.txt</code> reproduces them anywhere. Mine has Flask and Flask-SQLAlchemy.</p></div>
+<div class="qa"><p class="q">29. What is datetime used for in your project?</p><p class="a"><code>datetime.now().strftime('%Y-%m-%d')</code> stamps each booking with today's date as text like 2026-07-07.</p></div>
+<div class="qa"><p class="q">30. How would you round up a division (math.ceil)?</p><p class="a"><code>import math; math.ceil(2.1)</code> → 3. (Real viva ask: rounding up parking hours.) math.floor rounds down; round() rounds to nearest.</p></div>
+<div class="qa"><p class="q">31. What is a global variable?</p><p class="a">Defined at file top level, readable inside functions. To REASSIGN one inside a function you'd need <code>global name</code> — better avoided; I pass values as parameters instead.</p></div>
+<div class="qa"><p class="q">32. Difference between print and return?</p><p class="a">print writes to the terminal for humans; return hands a value back to the caller. A route must RETURN its response — printing it would show it in the terminal, not the browser.</p></div>
+<div class="qa"><p class="q">33. What are *args and **kwargs?</p><p class="a">Collect extra positional args into a tuple / extra keyword args into a dict, letting functions accept flexible arguments. Flask uses this pattern internally (e.g. url_for('edit_event', event_id=5)).</p></div>
+<div class="qa"><p class="q">34. What is string slicing?</p><p class="a"><code>s[start:stop]</code> — substring from start up to (not including) stop. <code>"Music Night"[0:3]</code> → "Eve". Works on lists too.</p></div>
+<div class="qa"><p class="q">35. How to loop with index?</p><p class="a"><code>for i, t in enumerate(events):</code> gives position + item. In Jinja, <code>loop.index</code> inside a for gives 1-based position.</p></div>
+<div class="qa"><p class="q">36. What is a docstring / comment?</p><p class="a">Comment: <code># note for humans</code>, ignored by Python. Docstring: a string right under a def/class describing it, readable via help().</p></div>
+<div class="qa"><p class="q">37. Write logic to limit a username to 10 characters (live-task classic).</p><p class="a">Backend: <code>if len(username) &gt; 10: flash('Username too long'); return redirect(url_for('register'))</code> before creating the user. Frontend: <code>maxlength="10"</code> on the input. Do both, say which is which.</p></div>
+<div class="qa"><p class="q">38. Write logic: password must have a capital letter and a special character (live-task classic).</p><p class="a"><code>if not any(c.isupper() for c in password) or not any(c in '!@#$%^&amp;*' for c in password): flash('Weak password')...</code> — any() returns True if any element passes.</p></div>
+
+<div class="pager">
+    <a href="viva-guide.html">← Prev</a>
+    <a href="index.html">⌂ Home</a>
+    <a href="qa-html-css.html">Next: Q&amp;A HTML/CSS →</a>
+</div>
+</div>
+</body>
+</html>

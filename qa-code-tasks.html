@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Live Code Tasks</title>
+<link rel="icon" type="image/png" href="icon.png">
+<link rel="stylesheet" href="style.css">
+<script>(function(){var t=localStorage.getItem("mad1-theme");if(location.hash==="#force-dark")t="dark";if(location.hash==="#force-light")t="light";if(t==="dark"||(!t&&window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches))document.documentElement.setAttribute("data-theme","dark");})();</script>
+<script src="app.js" defer></script>
+</head>
+<body>
+<div class="topnav"><a href="index.html">🏔️ Home</a></div>
+<div class="wrap">
+
+<h1>Live Code Tasks — practiced solutions (25 tasks)</h1>
+<div class="warn">
+<strong>⚠️ Note:</strong> examples on this page reference <strong>EventHub</strong>,
+the demo app built in this course — not any term's official project. Map every pattern to
+YOUR statement and never copy code into your submission (plagiarism = U grade).
+</div>
+<p>Every viva includes "change your code so that…". These are the real ones from past vivas,
+translated to the event-booking app. <strong>Practice each once before the viva.</strong> Golden rules:
+think out loud, edit the right layer (template for looks, route for logic, model for schema),
+restart the server after .py changes (templates only need refresh), and if a model changed —
+delete instance/eventhub.db.</p>
+
+<h2>Warm-ups they ask cold (often in Notepad)</h2>
+<div class="qa"><p class="q">1. Write a Flask route returning "Hello world".</p><p class="a"><pre><code>@app.route('/hello')
+def hello():
+    return 'Hello world'</code></pre></p></div>
+<div class="qa"><p class="q">2. Route /course/&lt;name&gt; printing "course is [name]".</p><p class="a"><pre><code>@app.route('/course/&lt;course_name&gt;')
+def course(course_name):
+    return 'course is ' + course_name</code></pre></p></div>
+<div class="qa"><p class="q">3. Jinja for loop over a list, only items &gt; 1.</p><p class="a"><pre><code>{% for n in a %}{% if n &gt; 1 %}{{ n }}{% endif %}{% endfor %}</code></pre></p></div>
+<div class="qa"><p class="q">4. Form page + route: input text → submit → next page shows the text.</p><p class="a"><pre><code>@app.route('/echo', methods=['GET', 'POST'])
+def echo():
+    if request.method == 'POST':
+        return 'You typed: ' + request.form['text']
+    return '&lt;form method="POST"&gt;&lt;input name="text"&gt;&lt;button&gt;Go&lt;/button&gt;&lt;/form&gt;'</code></pre>(Returning inline HTML is fine for a live task; mention a template is the proper way.)</p></div>
+<div class="qa"><p class="q">5. Two number inputs → page showing their sum.</p><p class="a">Same shape: <code>total = int(request.form['a']) + int(request.form['b'])</code>, return f-string. Remember int()!</p></div>
+<div class="qa"><p class="q">6. Flask endpoint reading URL params ?name=x&amp;course=y returning JSON.</p><p class="a"><pre><code>@app.route('/info')
+def info():
+    return {'name': request.args.get('name'),
+            'course': request.args.get('course')}</code></pre></p></div>
+<div class="qa"><p class="q">7. SQL: users whose name starts with S / ORM version.</p><p class="a"><code>SELECT * FROM user WHERE name LIKE 'S%';</code> — ORM: <code>User.query.filter(User.name.like('S%')).all()</code></p></div>
+<div class="qa"><p class="q">8. ORM: fetch all users / add a row to a table.</p><p class="a"><code>User.query.all()</code>. Add: create object → db.session.add(obj) → db.session.commit().</p></div>
+
+<h2>UI changes (template/CSS layer)</h2>
+<div class="qa"><p class="q">9. Change the background colour.</p><p class="a">static/style.css → <code>body { background-color: #eef; }</code> → save → hard refresh (Ctrl+F5, CSS may be cached). Inline alternative: style="background-color:..." on body in base.html.</p></div>
+<div class="qa"><p class="q">10. Background image (+ gradient) on login page.</p><p class="a">In style.css: <code>body { background-image: url('mountain.jpg'); background-size: cover; }</code> (file placed in static/). With darkening gradient: <code>background-image: linear-gradient(rgba(0,0,0,.4), rgba(0,0,0,.4)), url('mountain.jpg');</code></p></div>
+<div class="qa"><p class="q">11. Move a button (e.g. Register link / Add Event) to top-right.</p><p class="a">HTML order + Bootstrap: my Add Event already sits in a <code>d-flex justify-content-between</code> header row. Generic answer: wrap in <code>&lt;div class="text-end"&gt;</code> or add class <code>float-end</code>, or physically move the tag above the table.</p></div>
+<div class="qa"><p class="q">12. Stack the dashboard stat cards vertically instead of a row.</p><p class="a">In admin_dashboard.html change every <code>col-md-3</code> to <code>col-12</code> (each takes the full 12-unit row). Explaining the 12-column grid while doing it = extra points.</p></div>
+<div class="qa"><p class="q">13. Swap two navbar items / move a link to the end.</p><p class="a">base.html — reorder the &lt;a class="nav-link"&gt; lines; the last one before &lt;/div&gt; renders rightmost. ms-auto on the group pushes the whole block right.</p></div>
+<div class="qa"><p class="q">14. Bold a table column.</p><p class="a">Wrap the cell content: <code>&lt;td&gt;&lt;strong&gt;{{ event.name }}&lt;/strong&gt;&lt;/td&gt;</code> — or CSS <code>td:nth-child(2) { font-weight: bold; }</code>.</p></div>
+<div class="qa"><p class="q">15. Add a "Reset/Clear" button to the login form (classic!).</p><p class="a">One line inside the form: <code>&lt;button type="reset" class="btn btn-outline-secondary"&gt;Clear&lt;/button&gt;</code> — type="reset" empties fields, pure HTML, no JS.</p></div>
+
+<h2>Logic changes (route layer)</h2>
+<div class="qa"><p class="q">16. Limit username/password length (e.g. max 8–10 chars).</p><p class="a">register(): after reading the form, <code>if len(username) &gt; 10: flash('Max 10 characters'); return redirect(url_for('register'))</code>. Also show the frontend twin: maxlength="10". They usually want backend.</p></div>
+<div class="qa"><p class="q">17. Username must contain @ / password needs special char + capital.</p><p class="a"><code>if '@' not in username: flash(...)</code>. Password: <code>if not any(c.isupper() for c in password) or not any(c in '!@#$%' for c in password): flash(...)</code></p></div>
+<div class="qa"><p class="q">18. Confirm-password field.</p><p class="a">Template: second input name="confirm". Route: <code>if request.form['password'] != request.form['confirm']: flash('Passwords do not match'); return redirect(url_for('register'))</code></p></div>
+<div class="qa"><p class="q">19. Add a phone/age field to user registration that lands in the DB (very common!).</p><p class="a">Three layers, say them in order: (1) models.py User: <code>age = db.Column(db.Integer)</code>; (2) register.html: <code>&lt;input type="number" name="age"&gt;</code>; (3) register(): <code>age=int(request.form['age'])</code> in the User(...) call. Then DELETE instance/eventhub.db + restart (create_all won't alter the existing table) — knowing this step is what they're testing. Display: add a column in admin_users.html.</p></div>
+<div class="qa"><p class="q">20. Limit total events to N (admin can't add more than 5).</p><p class="a">Top of add_event POST: <code>if Event.query.count() &gt;= 5: flash('Limit of 5 events reached'); return redirect(url_for('admin_dashboard'))</code></p></div>
+<div class="qa"><p class="q">21. Prevent a user having more than 2 active bookings total.</p><p class="a">In book_event before creating: <code>if Booking.query.filter_by(user_id=user.id, status='Booked').count() &gt;= 2: flash('Booking limit reached'); return redirect(url_for('user_dashboard'))</code></p></div>
+<div class="qa"><p class="q">22. Filter a listing by a value (only events with slots == X / price = X).</p><p class="a">Route: <code>events = Event.query.filter_by(available_slots=int(request.args.get('slots'))).all()</code> or comparison via .filter(). Pattern matters: read param → filter → pass to template.</p></div>
+<div class="qa"><p class="q">23. New page: dropdown of all events from the DB + search shows bookings for it.</p><p class="a">Route GET: fetch events for the dropdown; on submit read event_id from request.args; query Booking.query.filter_by(event_id=...); render results. Template: <code>&lt;select name="event_id"&gt;{% for t in events %}&lt;option value="{{ t.id }}"&gt;{{ t.name }}&lt;/option&gt;{% endfor %}&lt;/select&gt;</code> — dynamic dropdown = loop over query results.</p></div>
+<div class="qa"><p class="q">24. Add a search by another field (e.g. events by category in admin search).</p><p class="a">Extend admin_search: <code>events_by_diff = Event.query.filter(Event.category.ilike('%'+q+'%')).all()</code> and merge/display. Shows you can extend your own pattern — exactly what they check.</p></div>
+<div class="qa"><p class="q">25. "What happens if admin deletes an event that has bookings?" — then make it safer.</p><p class="a">Current behaviour: bookings are deleted with it (manual cascade). Safer version live: block deletion when active bookings exist — <code>active = Booking.query.filter_by(event_id=event.id, status='Booked').count()</code>; <code>if active &gt; 0: flash('Cancel active bookings first'); return redirect(...)</code>. Or set event.status='Closed' instead of deleting (soft delete). Explaining the trade-off = L2 points.</p></div>
+
+<div class="tip"><strong>If the change doesn't show:</strong> 1) .py change? → restart server
+(Ctrl+C, python app.py). 2) model change? → delete instance/eventhub.db too. 3) CSS change? → hard
+refresh Ctrl+F5. 4) still weird? → close and reopen VS Code (a real student's viva was saved by
+exactly this).</div>
+
+<div class="pager">
+    <a href="qa-project.html">← Prev</a>
+    <a href="index.html">⌂ Home</a>
+</div>
+</div>
+</body>
+</html>

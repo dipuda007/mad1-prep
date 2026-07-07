@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lesson 7: How the Web Works</title>
+<link rel="icon" type="image/png" href="icon.png">
+<link rel="stylesheet" href="style.css">
+<script>(function(){var t=localStorage.getItem("mad1-theme");if(location.hash==="#force-dark")t="dark";if(location.hash==="#force-light")t="light";if(t==="dark"||(!t&&window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches))document.documentElement.setAttribute("data-theme","dark");})();</script>
+<script src="app.js" defer></script>
+</head>
+<body>
+<div class="topnav"><a href="index.html">🏔️ Home</a></div>
+<div class="wrap">
+
+<h1>Lesson 7: How the Web Works</h1>
+<p><strong>Goal:</strong> the mental model behind everything — and one of the heaviest viva areas.
+No typing this lesson; read twice.</p>
+
+<h2>Client and server</h2>
+<p>The <strong>client</strong> is the browser. The <strong>server</strong> is a program waiting for
+requests — in your project, Flask. The conversation is always:</p>
+<pre><code>Browser (client)                     Flask (server)
+      |  ---- HTTP REQUEST  ---&gt;          |
+      |  "GET /login"                     |   runs your login() function
+      |  &lt;--- HTTP RESPONSE ----          |
+      |  HTML + status code 200           |
+renders the HTML</code></pre>
+<p>This is the <strong>request–response cycle</strong>. The server never contacts the browser
+first; it only answers.</p>
+
+<div class="viva">"Is HTTP stateless? What does that mean?" — yes. Every request is independent;
+the server keeps no memory of previous requests by itself. That's why logins need
+<strong>sessions/cookies</strong> (Lesson 13) to "remember" who you are between requests.</div>
+
+<h2>HTTP methods (verbs)</h2>
+<table>
+<tr><th>Method</th><th>Meaning</th><th>In your project</th></tr>
+<tr><td><strong>GET</strong></td><td>fetch a page; data (if any) rides in the URL <code>?q=everest</code></td><td>viewing dashboards, search forms</td></tr>
+<tr><td><strong>POST</strong></td><td>send data to create/change something; data hidden in request body</td><td>register, login, book, delete forms</td></tr>
+<tr><td><strong>PUT</strong></td><td>replace/update a resource fully (idempotent)</td><td>not used — HTML forms only support GET/POST</td></tr>
+<tr><td><strong>PATCH</strong></td><td>partial update</td><td>—</td></tr>
+<tr><td><strong>DELETE</strong></td><td>remove a resource</td><td>— (we POST to a /delete route instead)</td></tr>
+</table>
+
+<div class="viva">"GET vs POST?" — GET carries data in the URL (visible, bookmarkable, cached,
+length-limited, never for passwords) and should not change data on the server. POST carries data
+in the request body (not visible in URL, no length limit, right for creating/changing data).
+<br><br>"POST vs PUT?" — POST creates (sending twice creates two records); PUT updates/replaces and
+is <em>idempotent</em> — sending the same PUT twice leaves the same result as once.
+<br><br>"Why did you use POST for update/delete instead of PUT/DELETE?" — plain HTML forms can only
+send GET and POST; PUT/DELETE are used in APIs (e.g. via JavaScript or Postman), and my core
+requirements forbid JS.</div>
+
+<h2>Status codes</h2>
+<table>
+<tr><th>Code</th><th>Meaning</th><th>Where you'll see it</th></tr>
+<tr><td>200</td><td>OK — success</td><td>every normal page load</td></tr>
+<tr><td>302</td><td>Found — redirect</td><td>every <code>redirect(url_for(...))</code>; watch the terminal!</td></tr>
+<tr><td>304</td><td>Not Modified — browser reuses its cached copy</td><td>static files like style.css on reload</td></tr>
+<tr><td>404</td><td>Not Found</td><td>wrong URL, or <code>get_or_404()</code> when an ID doesn't exist</td></tr>
+<tr><td>403</td><td>Forbidden — no permission</td><td></td></tr>
+<tr><td>401</td><td>Unauthorized — not logged in</td><td></td></tr>
+<tr><td>500</td><td>Internal Server Error — your Python crashed</td><td>bugs during development</td></tr>
+</table>
+<p>Groups: 2xx success · 3xx redirection · 4xx client's fault · 5xx server's fault. When you run
+Flask, every request prints its method + path + status code in the terminal — proctors ask about
+those lines.</p>
+
+<h2>HTTP vs HTTPS</h2>
+<p>HTTPS = HTTP + encryption (TLS/SSL). Data between browser and server is unreadable to anyone in
+between. Real sites use HTTPS; your local dev server uses HTTP because it never leaves your
+machine.</p>
+
+<h2>URL anatomy</h2>
+<pre><code>http://127.0.0.1:5000/user?category=Easy&amp;location=nepal
+ ^      ^         ^    ^         ^
+protocol address port  path      query string (GET parameters)</code></pre>
+
+<h2>What is an API / REST? (asked even if you didn't build one)</h2>
+<p>An <strong>API</strong> endpoint is a URL that returns <em>data</em> (usually JSON) instead of an
+HTML page, so other programs can use it. <strong>REST</strong> is a style for designing such APIs:
+resources live at nouns (<code>/api/events</code>), and HTTP verbs express the action — GET reads,
+POST creates, PUT updates, DELETE removes. <strong>JSON</strong> is text that looks like a Python
+dict: <code>{"name": "Music Night", "slots": 10}</code>. In Flask, returning a dict from a route
+automatically becomes JSON. If asked "why no API in your app?" — it's an optional milestone; core
+requirements are server-rendered HTML through Jinja templates.</p>
+
+<h2>MVC — how your project is organized</h2>
+<table>
+<tr><th>Letter</th><th>Role</th><th>In your project</th></tr>
+<tr><td><strong>M</strong>odel</td><td>data & rules</td><td><code>models.py</code> (User, StaffProfile, Event, Booking)</td></tr>
+<tr><td><strong>V</strong>iew</td><td>what the user sees</td><td><code>templates/</code> (Jinja HTML files)</td></tr>
+<tr><td><strong>C</strong>ontroller</td><td>logic connecting them</td><td>the route functions in <code>app.py</code></td></tr>
+</table>
+<div class="viva">"Show MVC in your code" — open the three places above, in that order, and say:
+request comes to a controller in app.py → controller queries models → passes results to a template
+→ template renders HTML back to the browser.</div>
+
+<div class="viva">"Client-server vs distributed architecture?" — client-server: many clients talk
+to one central server (your app). Distributed: work/data spread across many machines cooperating
+(big systems like Google). Related term "3-tier": presentation (browser) → application (Flask) →
+data (SQLite) — your app is exactly 3-tier.</div>
+
+<div class="pager">
+    <a href="06-css-bootstrap.html">← Prev</a>
+    <a href="index.html">⌂ Home</a>
+    <a href="08-flask-hello.html">Next: Flask Hello World →</a>
+</div>
+</div>
+</body>
+</html>

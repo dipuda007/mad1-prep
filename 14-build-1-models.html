@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Build 1: Database Models</title>
+<link rel="icon" type="image/png" href="icon.png">
+<link rel="stylesheet" href="style.css">
+<script>(function(){var t=localStorage.getItem("mad1-theme");if(location.hash==="#force-dark")t="dark";if(location.hash==="#force-light")t="light";if(t==="dark"||(!t&&window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches))document.documentElement.setAttribute("data-theme","dark");})();</script>
+<script src="app.js" defer></script>
+</head>
+<body>
+<div class="topnav"><a href="index.html">🏔️ Home</a></div>
+<div class="wrap">
+
+<h1>Build 1: Database Models &amp; Schema</h1>
+<div class="warn" style="border-left-width:8px">
+<strong>⚠️ READ THIS BEFORE TYPING A SINGLE LINE:</strong> this lesson builds
+<strong>EventHub — a demo app</strong>. It is <strong>NOT the official MAD-1 project</strong>
+and NOT a submission-ready solution for any term. This code is AI-generated teaching material.
+Copy-pasting it (or any public code) into your MAD-1 submission is plagiarism — IITM's
+similarity checks WILL flag it and you can be <strong>disqualified (U grade)</strong>.
+Learn the pattern here, then write YOUR project's code yourself, line by line.
+</div>
+<p><strong>Milestone:</strong> "Database Models and Schema Setup" — tables for User, Event, Booking,
+Staff Profile; relationships; admin pre-created programmatically. From here on you are building
+EventHub in <code>eventhub-app</code> — the same journey you will repeat, alone, for your own
+project. Type the code yourself.</p>
+
+<h2>0. Folder layout you are creating</h2>
+<pre><code>eventhub-app/
+├── app.py          ← Flask setup + routes (Controller)
+├── models.py       ← tables (Model)
+├── templates/      ← Jinja pages (View)  — next lesson
+├── static/
+│   └── style.css   ← your CSS           — next lesson
+└── requirements.txt</code></pre>
+
+<h2>1. The schema on paper (draw this in your report as the ER diagram)</h2>
+<pre><code>User(id PK, username UNIQUE, password_hash, name, role, approved, blacklisted)
+  │ 1-to-1 → StaffProfile(id PK, user_id FK, phone, experience)
+  │ 1-to-many → Booking(id PK, user_id FK, event_id FK, booking_date, status, payment_status)
+  │ 1-to-many (as staff) → Event(id PK, name, location, category, duration_hours,
+  │                            available_slots, status, start_date, end_date, staff_id FK)
+Event 1-to-many → Booking</code></pre>
+<p>Design decisions you must be able to defend:</p>
+<ul>
+<li><strong>One User table for all three roles</strong> with a <code>role</code> column — simpler than three tables, and login is one lookup.</li>
+<li><code>approved</code> — staff register but can't log in until admin flips this to True.</li>
+<li><code>blacklisted</code> — blocks login for anyone; admin can toggle.</li>
+<li><strong>StaffProfile separate</strong> — the milestone asks for it; demonstrates a one-to-one relationship.</li>
+<li><code>available_slots</code> lives on Event and is decremented on booking / incremented on cancel — overbooking check is simply <code>slots &lt;= 0</code>.</li>
+<li>Dates stored as 'YYYY-MM-DD' strings — HTML date inputs give exactly that, and SQLite has no real date type anyway.</li>
+</ul>
+
+<h2>2. models.py — type it</h2>
+<pre><code># models.py -- all database tables live here (the "M" in MVC)
+
+from flask_sqlalchemy import SQLAlchemy
+
+db = SQLAlchemy()
+
+
+class User(db.Model):
+    # one table for all three roles: admin / staff / user
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(50), unique=True, nullable=False)
+    password_hash = db.Column(db.String(200), nullable=False)
+    name = db.Column(db.String(100), nullable=False)
+    role = db.Column(db.String(20), nullable=False, default='user')
+    approved = db.Column(db.Boolean, nullable=False, default=True)      # staff start as False
+    blacklisted = db.Column(db.Boolean, nullable=False, default=False)
+
+    # relationships (these are not columns, they are shortcuts to related rows)
+    staff_profile = db.relationship('StaffProfile', backref='user', uselist=False)
+    bookings = db.relationship('Booking', backref='user')
+    assigned_events = db.relationship('Event', backref='staff')
+
+
+class StaffProfile(db.Model):
+    # extra details only staff members have (one-to-one with User)
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    phone = db.Column(db.String(15))
+    experience = db.Column(db.String(200))
+
+
+class Event(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    location = db.Column(db.String(100), nullable=False)
+    category = db.Column(db.String(20), nullable=False)                # Music / Sports / Tech
+    duration_hours = db.Column(db.Integer, nullable=False)
+    available_slots = db.Column(db.Integer, nullable=False)
+    status = db.Column(db.String(20), nullable=False, default='Pending')  # Pending/Approved/Open/Closed/Completed
+    start_date = db.Column(db.String(10))    # stored as 'YYYY-MM-DD' text (SQLite has no date type)
+    end_date = db.Column(db.String(10))
+    staff_id = db.Column(db.Integer, db.ForeignKey('user.id'))          # which staff runs this event
+
+    bookings = db.relationship('Booking', backref='event')
+
+
+class Booking(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    event_id = db.Column(db.Integer, db.ForeignKey('event.id'), nullable=False)
+    booking_date = db.Column(db.String(10), nullable=False)
+    status = db.Column(db.String(20), nullable=False, default='Booked')  # Booked / Cancelled / Completed
+    payment_status = db.Column(db.String(20), nullable=False, default='Paid')</code></pre>
+
+<h2>3. app.py — skeleton + admin created by code</h2>
+<pre><code># app.py -- Flask setup + all routes (the "C" in MVC). Templates are the "V".
+
+from datetime import datetime
+
+from flask import Flask, render_template, request, redirect, url_for, session, flash
+from werkzeug.security import generate_password_hash, check_password_hash
+
+from models import db, User, StaffProfile, Event, Booking
+
+app = Flask(__name__)
+app.config['SECRET_KEY'] = 'event-app-secret-key'                    # needed for session + flash
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///eventhub.db'     # file lands in instance/ folder
+db.init_app(app)
+
+
+# ---------- create tables + default admin, then start ----------
+
+def setup_database():
+    with app.app_context():
+        db.create_all()
+        if not User.query.filter_by(role='admin').first():
+            admin = User(username='admin',
+                         password_hash=generate_password_hash('admin123'),
+                         name='Administrator',
+                         role='admin')
+            db.session.add(admin)
+            db.session.commit()
+
+
+if __name__ == '__main__':
+    setup_database()
+    app.run(debug=True)</code></pre>
+<p>Explanations you must own:</p>
+<ul>
+<li><code>with app.app_context():</code> — database operations need to know which app's config to
+use; outside a request you must open the context manually. (Viva: "application context vs request
+context" — app context = app-level info like config/db, request context = info about one request
+like request.form; Flask opens both automatically during a request.)</li>
+<li><code>db.create_all()</code> — reads every db.Model class and CREATEs missing tables. This is
+the "database created programmatically" requirement — never touch DB Browser to create it.</li>
+<li>The admin <code>if</code> — runs every start, inserts admin only if absent. This is the
+"Admin pre-created programmatically" requirement.</li>
+</ul>
+
+<h2>4. Run it</h2>
+<pre><code>pip install flask flask-sqlalchemy
+python app.py</code></pre>
+<p>Server starts; an <code>instance/eventhub.db</code> file appears — your database, with 4 tables
+and 1 admin row, all created by code. (Browsing <code>/</code> gives 404 — no routes yet. Correct.)</p>
+
+<h2>5. requirements.txt</h2>
+<pre><code>Flask
+Flask-SQLAlchemy</code></pre>
+<p>One file, two lines. Lets any machine install your dependencies with
+<code>pip install -r requirements.txt</code>.</p>
+
+<h2>6. Commit the milestone (details in Lesson 20)</h2>
+<pre><code>git add .
+git commit -m "Milestone-1 TMA-MAD-1 Database models and schema setup"
+git push</code></pre>
+
+<div class="warn"><strong>If you later change a model</strong> (add a column etc.):
+<code>db.create_all()</code> will NOT alter existing tables. During development just delete
+<code>instance/eventhub.db</code> and restart — it's rebuilt fresh. Know this; a stale DB is the
+most common "why is my change not working" trap, including during the viva.</div>
+
+<div class="pager">
+    <a href="13-login-sessions.html">← Prev</a>
+    <a href="index.html">⌂ Home</a>
+    <a href="15-build-2-auth.html">Next: Build 2 — Authentication →</a>
+</div>
+</div>
+</body>
+</html>

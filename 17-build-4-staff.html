@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Build 4: Staff Dashboard</title>
+<link rel="icon" type="image/png" href="icon.png">
+<link rel="stylesheet" href="style.css">
+<script>(function(){var t=localStorage.getItem("mad1-theme");if(location.hash==="#force-dark")t="dark";if(location.hash==="#force-light")t="light";if(t==="dark"||(!t&&window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches))document.documentElement.setAttribute("data-theme","dark");})();</script>
+<script src="app.js" defer></script>
+</head>
+<body>
+<div class="topnav"><a href="index.html">🏔️ Home</a></div>
+<div class="wrap">
+
+<h1>Build 4: Event Staff Dashboard</h1>
+<div class="warn" style="border-left-width:8px">
+<strong>⚠️ READ THIS BEFORE TYPING A SINGLE LINE:</strong> this lesson builds
+<strong>EventHub — a demo app</strong>. It is <strong>NOT the official MAD-1 project</strong>
+and NOT a submission-ready solution for any term. This code is AI-generated teaching material.
+Copy-pasting it (or any public code) into your MAD-1 submission is plagiarism — IITM's
+similarity checks WILL flag it and you can be <strong>disqualified (U grade)</strong>.
+Learn the pattern here, then write YOUR project's code yourself, line by line.
+</div>
+<p><strong>Milestone:</strong> staff see only assigned events + attendee counts, update slots/status,
+manage participants, mark events started/completed. The theme of this build:
+<strong>"only assigned staff can manage their events"</strong> — expect the proctor to test it.</p>
+
+<h2>1. Dashboard: my events + booking counts</h2>
+<pre><code>@app.route('/staff')
+def staff_dashboard():
+    user = current_user()
+    if not user or user.role != 'staff':
+        return redirect(url_for('login'))
+
+    events = Event.query.filter_by(staff_id=user.id).all()
+    counts = {}
+    for t in events:
+        counts[t.id] = Booking.query.filter_by(event_id=t.id, status='Booked').count()
+    return render_template('staff_dashboard.html', events=events, counts=counts)</code></pre>
+<p>Two things to be able to say:
+<code>filter_by(staff_id=user.id)</code> is what makes staff see <em>only their</em> events;
+the counts dict counts only status='Booked' (cancelled bookings shouldn't count toward
+"registered attendees").</p>
+
+<h2>2. Update slots + status</h2>
+<pre><code>@app.route('/staff/event/update/&lt;int:event_id&gt;', methods=['POST'])
+def staff_update_event(event_id):
+    user = current_user()
+    if not user or user.role != 'staff':
+        return redirect(url_for('login'))
+
+    event = Event.query.get_or_404(event_id)
+    if event.staff_id != user.id:                   # only the assigned staff can touch this event
+        flash('That event is not assigned to you.')
+        return redirect(url_for('staff_dashboard'))
+
+    event.available_slots = int(request.form['available_slots'])
+    event.status = request.form['status']
+    db.session.commit()
+    flash('Event updated.')
+    return redirect(url_for('staff_dashboard'))</code></pre>
+<div class="warn">The <code>event.staff_id != user.id</code> check is THE critical line. Without it
+any staff could edit any event by typing the URL. Role check = "is a staff member";
+ownership check = "is THIS event's staff member". Two different protections — say both in the viva.</div>
+<p>The status dropdown offers Approved / Open / Closed / Completed — changing to Completed is your
+"mark event as completed" requirement.</p>
+
+<h2>3. Participants list + manage bookings</h2>
+<pre><code>@app.route('/staff/event/&lt;int:event_id&gt;/participants')
+def participants(event_id):
+    user = current_user()
+    if not user or user.role not in ['staff', 'admin']:
+        return redirect(url_for('login'))
+
+    event = Event.query.get_or_404(event_id)
+    if user.role == 'staff' and event.staff_id != user.id:
+        flash('That event is not assigned to you.')
+        return redirect(url_for('staff_dashboard'))
+
+    bookings = Booking.query.filter_by(event_id=event.id).all()
+    return render_template('participants.html', event=event, bookings=bookings)</code></pre>
+<p>Admin may also view this page (that's the <code>['staff', 'admin']</code>), but only the
+assigned staff gets action buttons — the template checks
+<code>{% if session.get('role') == 'staff' %}</code>.</p>
+
+<pre><code>@app.route('/staff/booking/&lt;int:booking_id&gt;/&lt;new_status&gt;', methods=['POST'])
+def staff_update_booking(booking_id, new_status):
+    user = current_user()
+    if not user or user.role != 'staff':
+        return redirect(url_for('login'))
+
+    booking = Booking.query.get_or_404(booking_id)
+    if booking.event.staff_id != user.id:
+        flash('That event is not assigned to you.')
+        return redirect(url_for('staff_dashboard'))
+
+    if new_status in ['Cancelled', 'Completed']:
+        if new_status == 'Cancelled' and booking.status == 'Booked':
+            booking.event.available_slots += 1      # give the slot back
+        booking.status = new_status
+        db.session.commit()
+        flash('Booking marked ' + new_status + '.')
+    return redirect(url_for('participants', event_id=booking.event_id))</code></pre>
+<p>Details worth noticing: <code>booking.event.staff_id</code> hops across the backref to check
+ownership; the <code>in ['Cancelled','Completed']</code> whitelist stops URL tricksters sending
+status "Banana"; cancelling returns the slot.</p>
+
+<h2>4. Templates, test, commit</h2>
+<p>Write <code>staff_dashboard.html</code> (a card per event with an inline update form) and
+<code>participants.html</code> (a table of that event's bookings). Test as your approved staff account: see only assigned events,
+update slots, set an event Open, view participants (empty until Build 5), try URL
+<code>/staff/event/&lt;other-id&gt;/participants</code> for an event not yours → blocked. Then:</p>
+<pre><code>git add .
+git commit -m "Milestone-4 TMA-MAD-1 Event staff dashboard and event management"
+git push</code></pre>
+
+<div class="pager">
+    <a href="16-build-3-admin.html">← Prev</a>
+    <a href="index.html">⌂ Home</a>
+    <a href="18-build-5-user.html">Next: Build 5 — User Dashboard →</a>
+</div>
+</div>
+</body>
+</html>

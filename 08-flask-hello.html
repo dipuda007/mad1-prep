@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lesson 8: Flask Hello World</title>
+<link rel="icon" type="image/png" href="icon.png">
+<link rel="stylesheet" href="style.css">
+<script>(function(){var t=localStorage.getItem("mad1-theme");if(location.hash==="#force-dark")t="dark";if(location.hash==="#force-light")t="light";if(t==="dark"||(!t&&window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches))document.documentElement.setAttribute("data-theme","dark");})();</script>
+<script src="app.js" defer></script>
+</head>
+<body>
+<div class="topnav"><a href="index.html">🏔️ Home</a></div>
+<div class="wrap">
+
+<h1>Lesson 8: Flask Hello World</h1>
+<p><strong>Goal:</strong> run a web server. This exact task ("write a route that prints hello
+world") is asked LIVE in vivas — practice until you can do it from memory in under a minute.</p>
+
+<h2>What is Flask?</h2>
+<p>A lightweight Python web framework: it receives HTTP requests, lets you map URLs to Python
+functions ("routes"), and sends back responses. "Micro" framework = gives you the core and stays
+out of the way (vs Django which bundles everything).</p>
+
+<h2>The smallest possible app</h2>
+<p>In your project folder create <code>app.py</code>:</p>
+<pre><code>from flask import Flask
+
+app = Flask(__name__)          # create the application object
+
+@app.route('/')                # when browser asks for "/"
+def home():                    # ...run this function
+    return 'Hello, world!'     # ...and send this back
+
+if __name__ == '__main__':
+    app.run(debug=True)        # start the server</code></pre>
+<p>Run it:</p>
+<pre><code>python app.py</code></pre>
+<p>Terminal shows <code>Running on http://127.0.0.1:5000</code>. Open that in your browser. Stop
+the server with <kbd>Ctrl+C</kbd>.</p>
+
+<h2>Line-by-line (memorize these answers)</h2>
+<table>
+<tr><th>Line</th><th>What it does</th></tr>
+<tr><td><code>Flask(__name__)</code></td><td>creates the app; <code>__name__</code> tells Flask where the file is so it can find <code>templates/</code> and <code>static/</code> folders</td></tr>
+<tr><td><code>@app.route('/')</code></td><td>decorator binding URL path "/" to the function below it</td></tr>
+<tr><td><code>app.run(debug=True)</code></td><td>starts the development server; debug mode auto-restarts on code changes and shows detailed error pages</td></tr>
+</table>
+
+<h2>More routes + dynamic routes</h2>
+<pre><code>@app.route('/about')
+def about():
+    return 'This is the about page'
+
+@app.route('/event/&lt;int:event_id&gt;')       # &lt;int:event_id&gt; captures a number from the URL
+def show_event(event_id):
+    return f'You asked for event number {event_id}'
+
+@app.route('/course/&lt;course_name&gt;')      # captures text — viva favourite live task!
+def course(course_name):
+    return f'Course is {course_name}'</code></pre>
+<p>Visit <code>/event/5</code> → "You asked for event number 5". The URL piece becomes a function
+argument.</p>
+
+<h2>Changing the port (asked in vivas!)</h2>
+<pre><code>app.run(debug=True, port=8080)     # default port is 5000</code></pre>
+
+<div class="viva">Rapid-fire answers: default Flask port? <strong>5000</strong>. Can it be changed?
+<strong>Yes, port= in app.run()</strong>. What is debug=True? <strong>auto-reload + error pages;
+must be off in production</strong>. Can a route return a boolean? <strong>No — returning
+<code>True</code> directly raises an error; wrap it: <code>str(True)</code>, or return JSON/dict.
+Valid return types: string, rendered template, redirect, dict (becomes JSON), tuple with status
+code.</strong></div>
+
+<h2>Try it (viva simulation)</h2>
+<p>Close this page. From an empty file, write a Flask app with: a route <code>/</code> returning
+"Hello world", and a route <code>/add/&lt;int:a&gt;/&lt;int:b&gt;</code> returning the sum as a
+string (<code>str(a+b)</code>). Run it, test both in the browser. Repeat tomorrow from memory.</p>
+
+<div class="pager">
+    <a href="07-how-web-works.html">← Prev</a>
+    <a href="index.html">⌂ Home</a>
+    <a href="09-jinja.html">Next: Jinja2 Templates →</a>
+</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lesson 9: Jinja2 Templates</title>
+<link rel="icon" type="image/png" href="icon.png">
+<link rel="stylesheet" href="style.css">
+<script>(function(){var t=localStorage.getItem("mad1-theme");if(location.hash==="#force-dark")t="dark";if(location.hash==="#force-light")t="light";if(t==="dark"||(!t&&window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches))document.documentElement.setAttribute("data-theme","dark");})();</script>
+<script src="app.js" defer></script>
+</head>
+<body>
+<div class="topnav"><a href="index.html">🏔️ Home</a></div>
+<div class="wrap">
+
+<h1>Lesson 9: Jinja2 Templates</h1>
+<p><strong>Goal:</strong> send real HTML pages with Python data inside. Second-biggest viva topic
+after the database.</p>
+
+<h2>What is Jinja2?</h2>
+<p>The template engine bundled with Flask. A template is an HTML file with placeholders; Flask
+fills the placeholders with your Python data before sending it to the browser. Two delimiters to
+know:</p>
+<table>
+<tr><th>Syntax</th><th>Purpose</th><th>Example</th></tr>
+<tr><td><code>{{ ... }}</code></td><td>print a value into the page</td><td><code>{{ event.name }}</code></td></tr>
+<tr><td><code>{% ... %}</code></td><td>logic: if, for, extends, block</td><td><code>{% for t in events %}</code></td></tr>
+</table>
+
+<h2>render_template</h2>
+<p>Templates must live in a folder literally named <code>templates</code>. Flask finds it
+automatically (that's what <code>Flask(__name__)</code> was for).</p>
+<pre><code># app.py
+from flask import Flask, render_template
+
+app = Flask(__name__)
+
+@app.route('/')
+def home():
+    events = ['Music Night', 'Kedarkantha', 'Valley of Flowers']
+    return render_template('home.html', events=events, count=len(events))</code></pre>
+<pre><code>&lt;!-- templates/home.html --&gt;
+&lt;h1&gt;We have {{ count }} events&lt;/h1&gt;
+&lt;ul&gt;
+    {% for t in events %}
+        &lt;li&gt;{{ t }}&lt;/li&gt;
+    {% endfor %}
+&lt;/ul&gt;</code></pre>
+<p>Note: every <code>{% for %}</code> needs <code>{% endfor %}</code>, every <code>{% if %}</code>
+needs <code>{% endif %}</code> — Jinja can't rely on indentation like Python.</p>
+
+<h2>if inside templates</h2>
+<pre><code>{% if event.available_slots &lt;= 0 %}
+    &lt;p&gt;Sold out!&lt;/p&gt;
+{% else %}
+    &lt;p&gt;{{ event.available_slots }} slots left&lt;/p&gt;
+{% endif %}</code></pre>
+<div class="viva">"Write a Jinja for loop / if" is a REAL live viva task (often in Notepad!).
+Practice writing from memory:
+<code>{% for x in items %} {{ x }} {% endfor %}</code> and
+<code>{% if ... %} {% else %} {% endif %}</code>.
+One real question: given <code>a = [1,2,3]</code>, print elements greater than 1 →
+<code>{% for n in a %}{% if n &gt; 1 %}{{ n }}{% endif %}{% endfor %}</code></div>
+
+<h2>Template inheritance — the big one</h2>
+<p>Every page shares the navbar, Bootstrap link, flash messages. Instead of repeating that in 12
+files, write it ONCE in <code>base.html</code> with holes, and let pages fill the holes.</p>
+<pre><code>&lt;!-- templates/base.html --&gt;
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+    &lt;title&gt;{% block title %}Event-booking App{% endblock %}&lt;/title&gt;
+    &lt;link href="...bootstrap.min.css" rel="stylesheet"&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;nav&gt;...navbar shared by every page...&lt;/nav&gt;
+    &lt;div class="container"&gt;
+        {% block content %}{% endblock %}
+    &lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+<pre><code>&lt;!-- templates/login.html --&gt;
+{% extends 'base.html' %}
+{% block title %}Login{% endblock %}
+{% block content %}
+    &lt;h1&gt;Login&lt;/h1&gt;
+    &lt;form&gt;...&lt;/form&gt;
+{% endblock %}</code></pre>
+<div class="viva">"What is template inheritance? Show it in your code." — a child template
+<code>{% extends 'base.html' %}</code> and overrides the <code>{% block %}</code> holes; common
+layout lives in one file (DRY — Don't Repeat Yourself). In your project: base.html holds navbar +
+Bootstrap + flash messages; all 12 pages extend it. Point at any template's first line.</div>
+
+<h2>url_for — never hardcode URLs</h2>
+<pre><code>&lt;a href="{{ url_for('login') }}"&gt;Login&lt;/a&gt;
+&lt;a href="{{ url_for('edit_event', event_id=event.id) }}"&gt;Edit&lt;/a&gt;
+&lt;link href="{{ url_for('static', filename='style.css') }}" rel="stylesheet"&gt;</code></pre>
+<div class="viva">"What goes inside url_for?" — the <strong>function name</strong> of the route
+(not the URL, not the template name!). <code>url_for('login')</code> builds "/login" from the
+function <code>def login()</code>. Extra arguments fill dynamic URL parts.
+<br><br>"url_for vs redirect vs render_template?" — <code>url_for</code> only <em>builds a URL
+string</em>; <code>redirect(url)</code> sends a 302 response telling the browser "go to this URL
+instead" (new request happens); <code>render_template</code> fills a template and returns the HTML
+in <em>this</em> response. Typical combo after a form: <code>redirect(url_for('dashboard'))</code>.</div>
+
+<h2>Try it</h2>
+<p>Build a two-page app (home + about) sharing one base.html with a navbar linking both pages via
+url_for. Pass a list of 3 events to home and print them as a Bootstrap table with a for loop.</p>
+
+<div class="pager">
+    <a href="08-flask-hello.html">← Prev</a>
+    <a href="index.html">⌂ Home</a>
+    <a href="10-forms.html">Next: Forms →</a>
+</div>
+</div>
+</body>
+</html>

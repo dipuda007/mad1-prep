@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Build 6: History &amp; Status Tracking</title>
+<link rel="icon" type="image/png" href="icon.png">
+<link rel="stylesheet" href="style.css">
+<script>(function(){var t=localStorage.getItem("mad1-theme");if(location.hash==="#force-dark")t="dark";if(location.hash==="#force-light")t="light";if(t==="dark"||(!t&&window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches))document.documentElement.setAttribute("data-theme","dark");})();</script>
+<script src="app.js" defer></script>
+</head>
+<body>
+<div class="topnav"><a href="index.html">🏔️ Home</a></div>
+<div class="wrap">
+
+<h1>Build 6: Booking History &amp; Event Status Tracking</h1>
+<div class="warn" style="border-left-width:8px">
+<strong>⚠️ READ THIS BEFORE TYPING A SINGLE LINE:</strong> this lesson builds
+<strong>EventHub — a demo app</strong>. It is <strong>NOT the official MAD-1 project</strong>
+and NOT a submission-ready solution for any term. This code is AI-generated teaching material.
+Copy-pasting it (or any public code) into your MAD-1 submission is plagiarism — IITM's
+similarity checks WILL flag it and you can be <strong>disqualified (U grade)</strong>.
+Learn the pattern here, then write YOUR project's code yourself, line by line.
+</div>
+<p><strong>Milestone:</strong> complete history per user, cancel flow, who-sees-what rules, status
+tracking. Mostly wiring the last pieces + verifying everything as a whole.</p>
+
+<h2>1. Cancel booking (the last route)</h2>
+<pre><code>@app.route('/user/cancel/&lt;int:booking_id&gt;', methods=['POST'])
+def cancel_booking(booking_id):
+    user = current_user()
+    if not user or user.role != 'user':
+        return redirect(url_for('login'))
+
+    booking = Booking.query.get_or_404(booking_id)
+    if booking.user_id != user.id:                 # you can only cancel your own booking
+        return redirect(url_for('user_dashboard'))
+
+    if booking.status == 'Booked':
+        booking.status = 'Cancelled'
+        booking.event.available_slots += 1
+        db.session.commit()
+        flash('Booking cancelled.')
+    return redirect(url_for('user_dashboard'))</code></pre>
+<p>Same ownership pattern as staff: <code>booking.user_id != user.id</code> stops users cancelling
+other people's bookings by guessing IDs. Slot goes back. Booking row is NOT deleted — status becomes
+'Cancelled' so <strong>history is preserved</strong>. That's the design answer for this milestone:
+we never delete booking history, we change status.</p>
+
+<h2>2. The who-sees-what matrix (know it cold)</h2>
+<table>
+<tr><th>Data</th><th>User</th><th>Staff</th><th>Admin</th></tr>
+<tr><td>Own bookings/history</td><td>✅ user dashboard (<code>filter_by(user_id=user.id)</code>)</td><td>—</td><td>—</td></tr>
+<tr><td>Participants of an event</td><td>❌</td><td>✅ only assigned events (<code>staff_id</code> check)</td><td>✅ any event</td></tr>
+<tr><td>All bookings ever</td><td>❌</td><td>❌</td><td>✅ /admin/bookings (<code>Booking.query.all()</code>)</td></tr>
+</table>
+
+<h2>3. Status lifecycles (the two state machines)</h2>
+<pre><code>Event:    Pending → Approved → Open → Closed → Completed
+         (admin sets initial;  staff moves it once assigned;
+          bookings allowed ONLY while Open)
+
+Booking: Booked → Cancelled  (by user, or by staff)
+         Booked → Completed  (by staff after the event)</code></pre>
+
+<h2>4. Full end-to-end test — run this exact story before calling it done</h2>
+<ol>
+<li>Delete <code>instance/eventhub.db</code>, restart → fresh DB, admin auto-created.</li>
+<li>Register staff "guide1" → login blocked (unapproved).</li>
+<li>Admin: approve guide1; create event "Indie Music Night", slots 2, status Open, assign guide1.</li>
+<li>Register users "ravi" and "meena".</li>
+<li>ravi books Music Night → slots 1. ravi books again → "already booked".</li>
+<li>meena books → slots 0. Register "amit", amit books → "No slots left".</li>
+<li>meena cancels → slots 1. amit books → works.</li>
+<li>guide1: sees Music Night only, count=2; opens participants; marks ravi Completed.</li>
+<li>guide1 sets status Closed → users can no longer see/book it.</li>
+<li>Admin: bookings page shows everything; search "eve" finds the event; blacklist amit → amit's
+login blocked.</li>
+</ol>
+<p>If every step behaves, your six core milestones are DONE and demonstrable — that list is also
+exactly your viva demo script and your video script.</p>
+
+<h2>5. Commit</h2>
+<pre><code>git add .
+git commit -m "Milestone-6 TMA-MAD-1 Event booking history and status tracking"
+git push</code></pre>
+
+<div class="tip"><strong>Optional enhancements (only if time remains after EVERYTHING else,
+including viva prep):</strong> the safest one for extra shine is backend validation hardening
+(reject negative slots, end date before start date). Charts/APIs/Flask-Login look impressive but
+every extra thing you add is another thing you must explain in the viva. The malpractice rule
+punishes fancy-but-unexplained far harder than plain-but-understood.</div>
+
+<div class="pager">
+    <a href="18-build-5-user.html">← Prev</a>
+    <a href="index.html">⌂ Home</a>
+    <a href="20-git-github.html">Next: Git &amp; GitHub →</a>
+</div>
+</div>
+</body>
+</html>

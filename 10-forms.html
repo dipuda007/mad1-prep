@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lesson 10: Forms</title>
+<link rel="icon" type="image/png" href="icon.png">
+<link rel="stylesheet" href="style.css">
+<script>(function(){var t=localStorage.getItem("mad1-theme");if(location.hash==="#force-dark")t="dark";if(location.hash==="#force-light")t="light";if(t==="dark"||(!t&&window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches))document.documentElement.setAttribute("data-theme","dark");})();</script>
+<script src="app.js" defer></script>
+</head>
+<body>
+<div class="topnav"><a href="index.html">🏔️ Home</a></div>
+<div class="wrap">
+
+<h1>Lesson 10: Forms — data from browser to Python</h1>
+<p><strong>Goal:</strong> the full round trip. "Make a page with an input and a submit button that
+shows the text on another page" is one of the MOST repeated live viva tasks — this lesson IS that
+task.</p>
+
+<h2>The pattern (memorize)</h2>
+<pre><code># app.py
+from flask import Flask, render_template, request, redirect, url_for
+
+app = Flask(__name__)
+
+@app.route('/ask', methods=['GET', 'POST'])
+def ask():
+    if request.method == 'POST':                # form was submitted
+        name = request.form['username']         # read by the input's name attribute
+        return redirect(url_for('show', person=name))
+    return render_template('ask.html')          # first visit: just show the form
+
+@app.route('/show/&lt;person&gt;')
+def show(person):
+    return f'Hello {person}!'</code></pre>
+<pre><code>&lt;!-- templates/ask.html --&gt;
+&lt;form method="POST"&gt;
+    &lt;input type="text" name="username"&gt;
+    &lt;button type="submit"&gt;Submit&lt;/button&gt;
+&lt;/form&gt;</code></pre>
+
+<h2>What happens, step by step</h2>
+<ol>
+<li>Browser GETs <code>/ask</code> → <code>request.method</code> is 'GET' → form page rendered.</li>
+<li>User types, clicks Submit → browser POSTs to the same URL with the data in the body.</li>
+<li><code>request.method</code> is now 'POST' → we read <code>request.form['username']</code>.</li>
+<li>We redirect (302) → browser makes a fresh GET to /show/name.</li>
+</ol>
+
+<table>
+<tr><th>You want</th><th>Use</th></tr>
+<tr><td>data from a POST form</td><td><code>request.form['field_name']</code></td></tr>
+<tr><td>data from the URL query string (?q=x, GET form)</td><td><code>request.args.get('q', '')</code></td></tr>
+<tr><td>which method was used</td><td><code>request.method</code></td></tr>
+</table>
+
+<div class="viva">"What if you remove <code>method="POST"</code> from the form?" — forms default to
+GET: the data moves into the URL as ?username=..., <code>request.form</code> becomes empty (you'd
+need request.args), and if the route only allows POST-handling logic the submit appears to do
+nothing. <br><br>"Why <code>methods=['GET','POST']</code> in the route?" — routes accept only GET
+by default; POSTing to a GET-only route gives <strong>405 Method Not Allowed</strong>.</div>
+
+<div class="viva">"Why redirect after POST instead of returning the page directly?" — the
+Post/Redirect/Get pattern: if you return HTML straight from the POST, refreshing the page re-submits
+the form (double booking!). Redirecting makes the browser land on a normal GET page.</div>
+
+<h2>Search forms use GET (your project does this)</h2>
+<pre><code>&lt;form method="GET" action="/user"&gt;
+    &lt;input type="text" name="location"&gt;
+    &lt;button type="submit"&gt;Filter&lt;/button&gt;
+&lt;/form&gt;</code></pre>
+<pre><code>location = request.args.get('location', '')   # '' default if absent</code></pre>
+<p>Search doesn't change data, results should be shareable/bookmarkable → GET is correct. Login
+changes state and carries a password → POST is correct. Being able to SAY this sentence is viva
+gold.</p>
+
+<h2>Try it (the classic viva task)</h2>
+<p>Two-number adder: form with two <code>type="number"</code> inputs → submit → new page shows the
+sum. You need: <code>int(request.form['a']) + int(request.form['b'])</code>. Build it without
+looking, 10 minutes max.</p>
+
+<div class="pager">
+    <a href="09-jinja.html">← Prev</a>
+    <a href="index.html">⌂ Home</a>
+    <a href="11-sql.html">Next: SQL &amp; SQLite →</a>
+</div>
+</div>
+</body>
+</html>

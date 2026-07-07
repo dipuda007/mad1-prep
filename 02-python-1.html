@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lesson 2: Python I</title>
+<link rel="icon" type="image/png" href="icon.png">
+<link rel="stylesheet" href="style.css">
+<script>(function(){var t=localStorage.getItem("mad1-theme");if(location.hash==="#force-dark")t="dark";if(location.hash==="#force-light")t="light";if(t==="dark"||(!t&&window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches))document.documentElement.setAttribute("data-theme","dark");})();</script>
+<script src="app.js" defer></script>
+</head>
+<body>
+<div class="topnav"><a href="index.html">🏔️ Home</a></div>
+<div class="wrap">
+
+<h1>Lesson 2: Python I — variables, strings, numbers</h1>
+<p><strong>Goal:</strong> read and write basic Python lines. Make a file <code>practice.py</code>
+and type everything below into it, run with <code>python practice.py</code>.</p>
+
+<h2>Variables</h2>
+<p>A variable is a name pointing to a value. No type declarations needed — Python figures it out.</p>
+<pre><code>event_name = "Indie Music Night"   # text  -> str
+slots = 10                        # whole number -> int
+price = 4999.50                   # decimal -> float
+is_open = True                    # True/False -> bool
+
+print(event_name)
+print(slots)</code></pre>
+
+<h2>Strings (text)</h2>
+<pre><code>name = "Ravi"
+greeting = "Hello " + name        # joining strings with +
+print(greeting)                   # Hello Ravi
+
+# f-string: put variables inside text (used everywhere)
+print(f"Event {event_name} has {slots} slots")
+
+print(len(name))                  # 4  (length)
+print(name.lower())               # ravi
+print(name.upper())               # RAVI</code></pre>
+
+<h2>Numbers</h2>
+<pre><code>slots = 10
+slots = slots - 1     # booking an event reduces slots -> 9
+slots -= 1            # same thing, shorter -> 8
+print(slots)
+
+days = "5"            # careful: this is TEXT not a number
+days = int("5")       # int() converts text to number — form inputs arrive as text!
+print(days + 1)       # 6</code></pre>
+
+<div class="viva">"Why did you write <code>int(request.form['duration_hours'])</code>?" — everything
+that comes from an HTML form is a string; <code>int()</code> converts it to a number so the database
+stores a proper integer and comparisons like <code>slots &lt;= 0</code> work.</div>
+
+<h2>Comments</h2>
+<pre><code># anything after a hash is ignored by Python — notes for humans</code></pre>
+
+<h2>Comparing things</h2>
+<pre><code>print(slots == 0)    # equal?          False
+print(slots != 0)    # not equal?      True
+print(slots &gt; 5)     # greater than?   True
+# one = assigns, two == compares. Mixing them up is the classic beginner bug.</code></pre>
+
+<h2>Try it</h2>
+<p>Write a file that stores your name, your event's name, and slots=3; then prints
+<em>"NAME booked TREK, 2 slots left"</em> using an f-string and slots − 1.</p>
+
+<div class="pager">
+    <a href="01-terminal.html">← Prev</a>
+    <a href="index.html">⌂ Home</a>
+    <a href="03-python-2.html">Next: Python II →</a>
+</div>
+</div>
+</body>
+</html>

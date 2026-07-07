@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MAD-1 Prep — Learn, Build, Pass the Viva</title>
+<link rel="icon" type="image/png" href="icon.png">
+<link rel="stylesheet" href="style.css">
+<script>(function(){var t=localStorage.getItem("mad1-theme");if(location.hash==="#force-dark")t="dark";if(location.hash==="#force-light")t="light";if(t==="dark"||(!t&&window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches))document.documentElement.setAttribute("data-theme","dark");})();</script>
+<script src="app.js" defer></script>
+</head>
+<body>
+<div class="topnav">🏔️ MAD-1 Prep App — MAD-1 Project (May 2026)</div>
+<div class="wrap">
+
+<h1>Your complete path: zero → working project → viva pass</h1>
+
+<p>You know nothing yet. That is fine. Follow the lessons <strong>in order</strong>, type every
+piece of code yourself (never copy-paste-forget), and by the end you will have built the
+EventHub demo app with your own hands and can defend every line in the viva.</p>
+
+<div class="warn" style="border-left-width:8px">
+<strong>⚠️ Honest-use warning:</strong> the Build lessons construct <strong>EventHub, a demo
+app</strong> — deliberately <strong>NOT</strong> any term's official MAD-1 project. All code here
+is AI-generated teaching material. Copy-pasting it (or any public code) into your MAD-1
+submission is plagiarism: IITM's similarity checks WILL flag it and you can be
+<strong>disqualified (U grade)</strong>. Learn the patterns, then build YOUR statement yourself.
+</div>
+
+<div class="warn">
+<strong>Deadlines (May 2026 term):</strong> submission by <strong>14 July 2026</strong> if your theory
+was completed before May 2026, or by <strong>9 August 2026</strong> if you registered theory in May 2026.
+Milestone 0 is creating your private GitHub repo. Each finished milestone needs a
+<strong>unique commit message</strong> pushed to GitHub (see Lesson 20).
+</div>
+
+<div class="tip">
+<strong>How to study:</strong> one lesson ≈ half a day to one day. Phase 1 gives you just enough
+of each tool — don't try to "finish" Python or HTML, you only need what the project uses.
+Phase 2 is where you build a complete app milestone by milestone. Every Build lesson shows the
+full working code — when stuck, read it, understand it, then type it yourself in your own folder.
+</div>
+
+<p class="phase">Phase 0 — Get your machine ready</p>
+<ul class="lesson-list">
+    <li><a href="00-setup.html">Lesson 0: Setup</a><span>Install Python + VS Code, make your project folder, run your first command.</span></li>
+    <li><a href="01-terminal.html">Lesson 1: The Terminal</a><span>cd, dir, running Python files — the 6 commands you actually need.</span></li>
+</ul>
+
+<p class="phase">Phase 1 — Just enough of each tool</p>
+<ul class="lesson-list">
+    <li><a href="02-python-1.html">Lesson 2: Python I</a><span>Variables, strings, f-strings, numbers, print, input.</span></li>
+    <li><a href="03-python-2.html">Lesson 3: Python II</a><span>Lists, dictionaries, if/else, for loops.</span></li>
+    <li><a href="04-python-3.html">Lesson 4: Python III</a><span>Functions, imports, classes — just enough for Flask models.</span></li>
+    <li><a href="05-html.html">Lesson 5: HTML</a><span>Tags, forms, tables, links — the skeleton of every page.</span></li>
+    <li><a href="06-css-bootstrap.html">Lesson 6: CSS &amp; Bootstrap</a><span>Styling, the 3 ways to add CSS, and letting Bootstrap do the work.</span></li>
+    <li><a href="07-how-web-works.html">Lesson 7: How the Web Works</a><span>Client, server, HTTP, GET vs POST, status codes. Heavy viva topic.</span></li>
+    <li><a href="08-flask-hello.html">Lesson 8: Flask Hello World</a><span>Install Flask, first route, debug mode, changing the port.</span></li>
+    <li><a href="09-jinja.html">Lesson 9: Jinja2 Templates</a><span>render_template, {{ }} vs {% %}, loops, template inheritance, url_for.</span></li>
+    <li><a href="10-forms.html">Lesson 10: Forms</a><span>GET vs POST forms, request.form, redirect — how data reaches Python.</span></li>
+    <li><a href="11-sql.html">Lesson 11: SQL &amp; SQLite</a><span>Tables, SELECT/INSERT/UPDATE/DELETE, primary &amp; foreign keys.</span></li>
+    <li><a href="12-sqlalchemy.html">Lesson 12: Flask-SQLAlchemy (ORM)</a><span>Models, db.create_all, queries, relationships, backref. Biggest viva topic.</span></li>
+    <li><a href="13-login-sessions.html">Lesson 13: Login &amp; Sessions</a><span>Password hashing, session dictionary, role-based redirects.</span></li>
+</ul>
+
+<p class="phase">Phase 2 — Build a complete app: EventHub demo (core milestones)</p>
+<ul class="lesson-list">
+    <li><a href="14-build-1-models.html">Build 1: Database Models</a><span>Milestone: models + schema + admin created by code.</span></li>
+    <li><a href="15-build-2-auth.html">Build 2: Authentication</a><span>Milestone: register, login, role dashboards, staff approval gate.</span></li>
+    <li><a href="16-build-3-admin.html">Build 3: Admin Dashboard</a><span>Milestone: stats, event CRUD, approve/blacklist, assign staff, search.</span></li>
+    <li><a href="17-build-4-staff.html">Build 4: Staff Dashboard</a><span>Milestone: assigned events, slots/status update, participants.</span></li>
+    <li><a href="18-build-5-user.html">Build 5: User Dashboard</a><span>Milestone: browse/search events, book, prevent overbooking &amp; duplicates.</span></li>
+    <li><a href="19-build-6-history.html">Build 6: Booking History</a><span>Milestone: history, cancel, status tracking, final checks.</span></li>
+</ul>
+
+<p class="phase">Phase 3 — Ship it</p>
+<ul class="lesson-list">
+    <li><a href="20-git-github.html">Lesson 20: Git &amp; GitHub</a><span>VS Code terminal: login/logout accounts, commit, push, milestone messages.</span></li>
+    <li><a href="21-submission.html">Lesson 21: Final Submission</a><span>Report, demo video, zip rules, validation form, checksum.</span></li>
+</ul>
+
+<p class="phase">Phase 4 — Viva preparation</p>
+<ul class="lesson-list">
+    <li><a href="viva-guide.html">Viva Guide</a><span>How both vivas work, rules, 10-minute rule, camera setup, malpractice traps.</span></li>
+    <li><a href="qa-python.html">Q&amp;A: Python</a><span>Lists vs tuples, decorators, OOP, exceptions…</span></li>
+    <li><a href="qa-html-css.html">Q&amp;A: HTML, CSS &amp; Bootstrap</a><span>CSS priority, inline vs block, cell padding/spacing…</span></li>
+    <li><a href="qa-flask-jinja.html">Q&amp;A: Flask &amp; Jinja</a><span>Routes, sessions, flash, secret key, template inheritance…</span></li>
+    <li><a href="qa-database.html">Q&amp;A: SQL, SQLite &amp; ORM</a><span>Keys, relationships, backref, constraints, normalization…</span></li>
+    <li><a href="qa-http-api.html">Q&amp;A: HTTP, REST &amp; Web Concepts</a><span>GET/POST/PUT, status codes, REST, MVC, architectures…</span></li>
+    <li><a href="qa-git.html">Q&amp;A: Git &amp; VCS</a><span>Distributed vs centralized, commands, branches…</span></li>
+    <li><a href="qa-project.html">Q&amp;A: Your Project</a><span>Questions aimed at the event-booking app itself — with exact answers from your code.</span></li>
+    <li><a href="qa-code-tasks.html">Live Code Tasks</a><span>The "change your code now" requests proctors love — practiced solutions.</span></li>
+</ul>
+
+</div>
+</body>
+</html>

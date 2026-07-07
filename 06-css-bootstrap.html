@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lesson 6: CSS &amp; Bootstrap</title>
+<link rel="icon" type="image/png" href="icon.png">
+<link rel="stylesheet" href="style.css">
+<script>(function(){var t=localStorage.getItem("mad1-theme");if(location.hash==="#force-dark")t="dark";if(location.hash==="#force-light")t="light";if(t==="dark"||(!t&&window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches))document.documentElement.setAttribute("data-theme","dark");})();</script>
+<script src="app.js" defer></script>
+</head>
+<body>
+<div class="topnav"><a href="index.html">🏔️ Home</a></div>
+<div class="wrap">
+
+<h1>Lesson 6: CSS &amp; Bootstrap</h1>
+<p><strong>Goal:</strong> understand the 3 ways to style, then let Bootstrap do 95% of the work.</p>
+
+<h2>CSS in one paragraph</h2>
+<p>CSS = rules saying <em>which elements</em> get <em>which looks</em>:</p>
+<pre><code>selector { property: value; }
+
+h1      { color: green; }            /* all h1 tags */
+.card   { border: 1px solid gray; }  /* all elements with class="card" */
+#logo   { width: 100px; }            /* the one element with id="logo" */</code></pre>
+
+<h2>The 3 ways to attach CSS (viva favourite!)</h2>
+<table>
+<tr><th>Way</th><th>How</th><th>Priority</th></tr>
+<tr><td><strong>Inline</strong></td><td><code>&lt;p style="color:red"&gt;</code> directly on the tag</td><td>Highest</td></tr>
+<tr><td><strong>Internal</strong></td><td><code>&lt;style&gt;…&lt;/style&gt;</code> block inside <code>&lt;head&gt;</code></td><td rowspan="2">Whichever rule is more <em>specific</em>; tie → the one written <em>later</em> wins</td></tr>
+<tr><td><strong>External</strong></td><td>separate .css file linked with<br><code>&lt;link rel="stylesheet" href="style.css"&gt;</code></td></tr>
+</table>
+<div class="viva">"Why does inline CSS win?" — it is closest to the element, so its
+<em>specificity</em> is highest; the browser resolves conflicts by specificity
+(inline &gt; id &gt; class &gt; tag), and when equal, the last-loaded rule wins — that is the
+"cascading" in Cascading Style Sheets. Your project uses an <strong>external</strong> file
+(<code>static/style.css</code>) plus Bootstrap (also external).</div>
+
+<h2>Bootstrap — pre-written CSS classes</h2>
+<p>Bootstrap is a CSS framework: someone already wrote thousands of polished rules; you just put
+their class names on your tags. Add ONE line inside <code>&lt;head&gt;</code>:</p>
+<pre><code>&lt;link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"&gt;</code></pre>
+<div class="viva">"What is a CDN?" — Content Delivery Network: a network of servers around the
+world that host common files (like bootstrap.min.css) so browsers download them fast from a nearby
+server, instead of your server sending them. The link above loads Bootstrap from a CDN.</div>
+
+<h2>The only Bootstrap classes your project uses</h2>
+<table>
+<tr><th>Class</th><th>Effect</th></tr>
+<tr><td><code>container</code></td><td>centered page column with side margins</td></tr>
+<tr><td><code>row</code> / <code>col-md-3</code></td><td>grid: a row split into 12 units; col-md-3 = 3/12 = quarter width on medium+ screens (this is what makes it responsive)</td></tr>
+<tr><td><code>card</code>, <code>card-body</code>, <code>card-title</code></td><td>white box with border — used for login box, dashboard stats</td></tr>
+<tr><td><code>table table-bordered table-hover</code></td><td>styled table with borders + hover highlight</td></tr>
+<tr><td><code>btn btn-success btn-sm</code></td><td>button; success=green, danger=red, primary=blue; sm=small</td></tr>
+<tr><td><code>form-control</code> / <code>form-select</code> / <code>form-label</code></td><td>styled inputs, dropdowns, labels</td></tr>
+<tr><td><code>navbar navbar-dark bg-success</code></td><td>the green top navigation bar</td></tr>
+<tr><td><code>alert alert-info</code></td><td>the message boxes for flash messages</td></tr>
+<tr><td><code>badge bg-secondary</code></td><td>small gray label — used for statuses like "Open"</td></tr>
+<tr><td><code>mb-3 mt-4 ms-auto w-100 d-inline text-center</code></td><td>spacing/layout utilities: margin-bottom, margin-top, margin-start auto (push right), full width, inline display, centered text</td></tr>
+</table>
+<p>That's the entire list. If a proctor points at any class in your templates, the answer is in
+this table.</p>
+
+<div class="viva">"Why Bootstrap?" — ready-made, tested, <strong>responsive</strong> (adapts to
+mobile/tablet via its grid), consistent look, no need to write hundreds of CSS lines. The project
+statement allows only Bootstrap as a CSS framework.</div>
+
+<h2>Your own CSS on top</h2>
+<p>Your project also has a small <code>static/style.css</code> — a page background colour, a green
+strip on stat cards, a soft card shadow. Written by you, easy to explain, proves you can write raw
+CSS too. Loaded <em>after</em> Bootstrap, so your rules win ties.</p>
+
+<h2>Try it</h2>
+<p>Take yesterday's test.html, add the Bootstrap link, wrap the content in
+<code>&lt;div class="container"&gt;</code>, give the table
+<code>class="table table-bordered"</code> and the button
+<code>class="btn btn-success"</code>. Refresh, admire.</p>
+
+<div class="pager">
+    <a href="05-html.html">← Prev</a>
+    <a href="index.html">⌂ Home</a>
+    <a href="07-how-web-works.html">Next: How the Web Works →</a>
+</div>
+</div>
+</body>
+</html>

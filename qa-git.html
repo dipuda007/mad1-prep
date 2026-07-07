@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Q&amp;A: Git &amp; VCS</title>
+<link rel="icon" type="image/png" href="icon.png">
+<link rel="stylesheet" href="style.css">
+<script>(function(){var t=localStorage.getItem("mad1-theme");if(location.hash==="#force-dark")t="dark";if(location.hash==="#force-light")t="light";if(t==="dark"||(!t&&window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches))document.documentElement.setAttribute("data-theme","dark");})();</script>
+<script src="app.js" defer></script>
+</head>
+<body>
+<div class="topnav"><a href="index.html">🏔️ Home</a></div>
+<div class="wrap">
+
+<h1>Q&amp;A: Git &amp; Version Control (20 questions)</h1>
+
+<div class="qa"><p class="q">1. What is a version control system (VCS)? Another name?</p><p class="a">Software recording changes to files over time so you can recall any version. Also called source control / revision control. Git is the dominant one.</p></div>
+<div class="qa"><p class="q">2. What is Git?</p><p class="a">A distributed VCS: snapshots ("commits") of your project with full history on every machine. Created by Linus Torvalds for Linux kernel development.</p></div>
+<div class="qa"><p class="q">3. Git vs GitHub?</p><p class="a">Git = the tool on your machine. GitHub = a website hosting git repositories for backup/collaboration. Alternatives to GitHub: GitLab, Bitbucket.</p></div>
+<div class="qa"><p class="q">4. Is git centralized or distributed? Why is distributed better?</p><p class="a">Distributed — every clone holds complete history; you commit/browse history offline; no single point of failure. Centralized VCS (SVN) needs the server for almost everything.</p></div>
+<div class="qa"><p class="q">5. Uses of git besides tracking changes?</p><p class="a">Collaboration (branches/merges), experimenting safely, reverting mistakes, code review via pull requests, and here: my commit history is evidence the project is my own work built over time.</p></div>
+<div class="qa"><p class="q">6. What is a repository?</p><p class="a">A project folder tracked by git — the .git subfolder holds all history. Local repo on my machine, remote repo on GitHub.</p></div>
+<div class="qa"><p class="q">7. What is a commit? A good commit message?</p><p class="a">A saved snapshot with author, timestamp, message. Message should say what/why concisely — my milestone commits use the required unique messages like "Milestone-3 TMA-MAD-1 Admin dashboard and management".</p></div>
+<div class="qa"><p class="q">8. What does git add do? The staging area?</p><p class="a">add moves changes into the staging area (index) — the "shopping cart" of what the next commit will contain. git add . stages everything; commit then snapshots the staged set.</p></div>
+<div class="qa"><p class="q">9. The everyday workflow?</p><p class="a">git status (see changes) → git add . (stage) → git commit -m "msg" (snapshot) → git push (upload to GitHub).</p></div>
+<div class="qa"><p class="q">10. What is git push / pull / clone / fetch?</p><p class="a">push: upload local commits to the remote. pull: download + merge remote commits. clone: copy an entire remote repo (with history) to your machine. fetch: download without merging.</p></div>
+<div class="qa"><p class="q">11. What is a branch? Create one? (asked as a live task)</p><p class="a">An independent line of development. <code>git branch feature-x</code> creates; <code>git checkout feature-x</code> switches; <code>git checkout -b feature-x</code> does both. Default branch: main.</p></div>
+<div class="qa"><p class="q">12. What is a merge? A merge conflict?</p><p class="a">merge brings another branch's commits into the current one. Conflict = both branches edited the same lines; git marks the file and you choose manually, then commit.</p></div>
+<div class="qa"><p class="q">13. What is .gitignore?</p><p class="a">A file listing path patterns git must not track. Mine: __pycache__/, instance/, venv/, *.pyc — machine-generated files don't belong in history.</p></div>
+<div class="qa"><p class="q">14. Stop tracking a file but keep it on disk? (asked verbatim)</p><p class="a"><code>git rm --cached filename</code>, then add it to .gitignore, commit.</p></div>
+<div class="qa"><p class="q">15. See history? Undo things?</p><p class="a">History: git log (--oneline for short). Undo unstaged file changes: git checkout -- file (or git restore file). Unstage: git reset file. Revert a pushed commit safely: git revert &lt;hash&gt; (makes an opposite commit).</p></div>
+<div class="qa"><p class="q">16. What is git status vs git log?</p><p class="a">status: current uncommitted state (what changed, what's staged). log: the commit history.</p></div>
+<div class="qa"><p class="q">17. What is a remote? What is origin?</p><p class="a">A named URL of a hosted copy. origin = default name for the remote you cloned from / added — mine points to github.com/24f2008594/MAD-1-PROJECT-IITM.</p></div>
+<div class="qa"><p class="q">18. How did GitHub authentication work from your terminal?</p><p class="a">Git Credential Manager (bundled with Git for Windows) pops a browser login on first push, then stores a token in Windows Credential Manager — later pushes don't ask. Switching accounts = remove the credential and push again.</p></div>
+<div class="qa"><p class="q">19. Why is your repo private with a collaborator?</p><p class="a">Course rule: code must not be public (plagiarism risk — both parties get U); MADI-cs2003 added as collaborator so the team can track milestone commits. That's Milestone 0.</p></div>
+<div class="qa"><p class="q">20. What is a pull request?</p><p class="a">GitHub feature: propose a branch's changes for review before merging — how teams review code. Solo project: I commit straight to main.</p></div>
+
+<div class="pager">
+    <a href="qa-http-api.html">← Prev</a>
+    <a href="index.html">⌂ Home</a>
+    <a href="qa-project.html">Next: Q&amp;A Your Project →</a>
+</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lesson 12: Flask-SQLAlchemy (ORM)</title>
+<link rel="icon" type="image/png" href="icon.png">
+<link rel="stylesheet" href="style.css">
+<script>(function(){var t=localStorage.getItem("mad1-theme");if(location.hash==="#force-dark")t="dark";if(location.hash==="#force-light")t="light";if(t==="dark"||(!t&&window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches))document.documentElement.setAttribute("data-theme","dark");})();</script>
+<script src="app.js" defer></script>
+</head>
+<body>
+<div class="topnav"><a href="index.html">🏔️ Home</a></div>
+<div class="wrap">
+
+<h1>Lesson 12: Flask-SQLAlchemy — the ORM</h1>
+<p><strong>Goal:</strong> the #1 viva topic. Every proctor asks "what is ORM". Own this lesson.</p>
+
+<h2>What is an ORM?</h2>
+<p><strong>Object-Relational Mapper</strong>: a translator between Python objects and database
+tables. Classes ↔ tables, objects ↔ rows, attributes ↔ columns. You write Python; the ORM writes
+the SQL.</p>
+<table>
+<tr><th>You write (Python)</th><th>ORM runs (SQL)</th></tr>
+<tr><td><code>Event.query.all()</code></td><td><code>SELECT * FROM event;</code></td></tr>
+<tr><td><code>Event.query.get(5)</code></td><td><code>SELECT * FROM event WHERE id=5;</code></td></tr>
+<tr><td><code>db.session.add(t); db.session.commit()</code></td><td><code>INSERT INTO event VALUES (...);</code></td></tr>
+<tr><td><code>t.slots = 9; db.session.commit()</code></td><td><code>UPDATE event SET slots=9 WHERE id=...;</code></td></tr>
+</table>
+<div class="viva">"ORM advantages/disadvantages?" — Advantages: no hand-written SQL, protection
+against SQL injection, database-independent (swap SQLite→MySQL by changing one config line),
+results are Python objects. Disadvantage: slightly slower than raw SQL, hides what's happening, and
+very complex queries can be awkward. "Which ORM did you use?" — <strong>SQLAlchemy</strong>, via
+the Flask-SQLAlchemy extension. "Is SQLAlchemy() a class or function?" — a <strong>class</strong>;
+<code>db = SQLAlchemy()</code> creates an instance.</div>
+
+<h2>Setup (exactly as your project does it)</h2>
+<pre><code># models.py
+from flask_sqlalchemy import SQLAlchemy
+db = SQLAlchemy()
+
+# app.py
+from models import db
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///eventhub.db'
+db.init_app(app)</code></pre>
+<div class="viva">"Where is your database defined/initialized?" — the URI config line in app.py
+says <em>which</em> database (a SQLite file named eventhub.db, created inside the
+<code>instance/</code> folder); <code>db.init_app(app)</code> connects SQLAlchemy to the Flask app;
+<code>db.create_all()</code> creates the tables from the model classes.</div>
+
+<h2>Defining a model</h2>
+<pre><code>class Event(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    available_slots = db.Column(db.Integer, nullable=False)
+    staff_id = db.Column(db.Integer, db.ForeignKey('user.id'))</code></pre>
+<p>Column types: <code>db.Integer</code>, <code>db.String(n)</code>, <code>db.Boolean</code>,
+<code>db.Float</code>, <code>db.Date</code>… Options: <code>primary_key=True</code>,
+<code>unique=True</code>, <code>nullable=False</code>, <code>default=...</code>.
+Table name defaults to the class name lowercased → FK strings are lowercase:
+<code>db.ForeignKey('user.id')</code>.</p>
+
+<h2>Queries — your app's vocabulary</h2>
+<pre><code>Event.query.all()                          # list of all events
+Event.query.get(3)                         # one event by primary key (or None)
+Event.query.get_or_404(3)                  # same but auto-404 page if missing
+Event.query.filter_by(status='Open').all() # WHERE status='Open'
+Event.query.filter_by(status='Open').first()   # first match or None
+Event.query.count()                        # number of rows
+User.query.filter_by(username='ravi').first() # login lookup
+Event.query.filter(Event.location.ilike('%nepal%')).all()  # case-insensitive search</code></pre>
+<div class="viva">"like vs ilike?" — <code>like</code> is case-sensitive pattern match,
+<code>ilike</code> is case-insensitive; <code>%</code> means "anything" — <code>'%nep%'</code>
+matches Nepal, NEPAL, event-booking-in-nepal. "filter_by vs filter?" — filter_by takes simple
+keyword equality (<code>filter_by(status='Open')</code>); filter takes full expressions
+(<code>filter(Event.slots &gt; 0)</code>, ilike, comparisons).</div>
+
+<h2>Changing data — the session</h2>
+<pre><code># CREATE
+t = Event(name='Music Night', available_slots=10, ...)
+db.session.add(t)
+db.session.commit()
+
+# UPDATE — just change the object
+t.available_slots -= 1
+db.session.commit()
+
+# DELETE
+db.session.delete(t)
+db.session.commit()</code></pre>
+<div class="viva">"What is db.session? Why commit?" — the session is a staging area collecting your
+changes (a transaction); nothing touches the database file until <code>commit()</code> writes them
+all at once. Forgot commit = changes vanish. That's the answer to "I added a row, why isn't it in
+the DB?"</div>
+
+<h2>Relationships & backref — asked in EVERY viva</h2>
+<pre><code>class Event(db.Model):
+    ...
+    bookings = db.relationship('Booking', backref='event')
+
+class Booking(db.Model):
+    ...
+    event_id = db.Column(db.Integer, db.ForeignKey('event.id'), nullable=False)</code></pre>
+<p>The FK column creates the link in the database. <code>db.relationship</code> creates Python
+conveniences on BOTH sides:</p>
+<ul>
+<li><code>some_event.bookings</code> → list of that event's Booking objects</li>
+<li><code>some_booking.event</code> → the Event object it belongs to (this reverse attribute is what <strong>backref</strong> creates)</li>
+</ul>
+<div class="viva">"backref vs back_populates?" — both wire up the two-way link.
+<code>backref</code>: declared on ONE side, the other side is generated automatically (what your
+project uses — less code). <code>back_populates</code>: you declare the relationship explicitly on
+BOTH classes and name each side — more typing, more explicit. Functionally equivalent here.
+<br><br>"What is lazy loading / lazy=True?" — related rows are NOT fetched when you load the parent;
+SQLAlchemy runs the extra query only at the moment you access <code>event.bookings</code>. Default
+behaviour. (<code>lazy='dynamic'</code> would give a query object you can filter further instead of
+a list.)
+<br><br>"What is cascading / cascade='all, delete'?" — rules for what happens to child rows when the
+parent changes/is deleted; with delete-cascade, deleting an event would auto-delete its bookings. Your
+project deletes the bookings explicitly in the route instead — same result, visible logic.
+<br><br>"uselist=False?" — makes the relationship return one object instead of a list — that's how
+User ↔ StaffProfile becomes one-to-one.</div>
+
+<h2>Try it</h2>
+<p>Small script: define an event model, create the DB, insert 2 events, query all + print names, update
+one's slots, delete the other. Run it twice — notice "already exists" behaviour of create_all
+(it only creates missing tables, never alters existing ones).</p>
+
+<div class="pager">
+    <a href="11-sql.html">← Prev</a>
+    <a href="index.html">⌂ Home</a>
+    <a href="13-login-sessions.html">Next: Login &amp; Sessions →</a>
+</div>
+</div>
+</body>
+</html>

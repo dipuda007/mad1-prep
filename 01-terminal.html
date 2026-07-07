@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lesson 1: The Terminal</title>
+<link rel="icon" type="image/png" href="icon.png">
+<link rel="stylesheet" href="style.css">
+<script>(function(){var t=localStorage.getItem("mad1-theme");if(location.hash==="#force-dark")t="dark";if(location.hash==="#force-light")t="light";if(t==="dark"||(!t&&window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches))document.documentElement.setAttribute("data-theme","dark");})();</script>
+<script src="app.js" defer></script>
+</head>
+<body>
+<div class="topnav"><a href="index.html">🏔️ Home</a></div>
+<div class="wrap">
+
+<h1>Lesson 1: The Terminal</h1>
+<p><strong>Goal:</strong> stop fearing the black box. You need exactly these commands.</p>
+
+<h2>The commands you will actually use</h2>
+<table>
+<tr><th>Command</th><th>What it does</th><th>Example</th></tr>
+<tr><td><code>cd foldername</code></td><td>go into a folder ("change directory")</td><td><code>cd eventhub-app</code></td></tr>
+<tr><td><code>cd ..</code></td><td>go one folder up</td><td></td></tr>
+<tr><td><code>dir</code></td><td>list what is in the current folder</td><td></td></tr>
+<tr><td><code>mkdir name</code></td><td>create a folder</td><td><code>mkdir templates</code></td></tr>
+<tr><td><code>python file.py</code></td><td>run a Python file</td><td><code>python app.py</code></td></tr>
+<tr><td><code>pip install name</code></td><td>install a Python package from the internet</td><td><code>pip install flask</code></td></tr>
+<tr><td><kbd>Ctrl+C</kbd></td><td>stop a running program (e.g. stop the Flask server)</td><td></td></tr>
+</table>
+
+<div class="tip">Press the <kbd>↑</kbd> arrow key in the terminal to repeat previous commands, and
+<kbd>Tab</kbd> to auto-complete file/folder names. These two save enormous time in the viva.</div>
+
+<h2>Practice (2 minutes)</h2>
+<pre><code>cd C:\projects\eventhub-app
+dir
+python hello.py</code></pre>
+
+<h2>Where am I?</h2>
+<p>The terminal always shows your current folder in the prompt, e.g.
+<code>PS C:\projects\eventhub-app&gt;</code>. Flask must always be started <strong>from the folder
+that contains app.py</strong> — "it doesn't run" is almost always "you are in the wrong folder".</p>
+
+<div class="viva">"What does localhost mean?" — <code>localhost</code> (IP 127.0.0.1) is a special
+address meaning <em>this same computer</em>. When Flask runs at
+<code>http://127.0.0.1:5000</code>, the server and the browser are both your own machine; 5000 is
+the port number Flask listens on by default.</div>
+
+<div class="pager">
+    <a href="00-setup.html">← Prev</a>
+    <a href="index.html">⌂ Home</a>
+    <a href="02-python-1.html">Next: Python I →</a>
+</div>
+</div>
+</body>
+</html>

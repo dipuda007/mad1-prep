@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Build 5: User Dashboard &amp; Booking</title>
+<link rel="icon" type="image/png" href="icon.png">
+<link rel="stylesheet" href="style.css">
+<script>(function(){var t=localStorage.getItem("mad1-theme");if(location.hash==="#force-dark")t="dark";if(location.hash==="#force-light")t="light";if(t==="dark"||(!t&&window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches))document.documentElement.setAttribute("data-theme","dark");})();</script>
+<script src="app.js" defer></script>
+</head>
+<body>
+<div class="topnav"><a href="index.html">🏔️ Home</a></div>
+<div class="wrap">
+
+<h1>Build 5: User Dashboard &amp; Event Booking</h1>
+<div class="warn" style="border-left-width:8px">
+<strong>⚠️ READ THIS BEFORE TYPING A SINGLE LINE:</strong> this lesson builds
+<strong>EventHub — a demo app</strong>. It is <strong>NOT the official MAD-1 project</strong>
+and NOT a submission-ready solution for any term. This code is AI-generated teaching material.
+Copy-pasting it (or any public code) into your MAD-1 submission is plagiarism — IITM's
+similarity checks WILL flag it and you can be <strong>disqualified (U grade)</strong>.
+Learn the pattern here, then write YOUR project's code yourself, line by line.
+</div>
+<p><strong>Milestone:</strong> browse open events, search/filter by category + location, book,
+prevent duplicates and overbooking. The booking route is the most examined function in the whole
+app — proctors poke exactly here ("book two slots with the same account", "book when slots are
+0").</p>
+
+<h2>1. Dashboard with search/filter</h2>
+<pre><code>@app.route('/user')
+def user_dashboard():
+    user = current_user()
+    if not user or user.role != 'user':
+        return redirect(url_for('login'))
+
+    # optional search filters from the GET form
+    category = request.args.get('category', '')
+    location = request.args.get('location', '')
+
+    query = Event.query.filter_by(status='Open')
+    if category:
+        query = query.filter_by(category=category)
+    if location:
+        query = query.filter(Event.location.ilike('%' + location + '%'))
+    events = query.all()
+
+    my_bookings = Booking.query.filter_by(user_id=user.id).all()
+    return render_template('user_dashboard.html', events=events, my_bookings=my_bookings,
+                           category=category, location=location)</code></pre>
+<p>Explainable gold in here:</p>
+<ul>
+<li><code>filter_by(status='Open')</code> — users only ever see Open events ("allow users to view
+approved/open events").</li>
+<li>The query is built up step by step — filters only applied if the user filled them. This is
+your "search and filter events based on category and location".</li>
+<li><code>request.args</code> not <code>request.form</code> — the filter form is GET.</li>
+<li><code>my_bookings</code> filtered by <code>user_id=user.id</code> — users see only their own
+history.</li>
+</ul>
+
+<h2>2. The booking route — three guards</h2>
+<pre><code>@app.route('/user/book/&lt;int:event_id&gt;', methods=['POST'])
+def book_event(event_id):
+    user = current_user()
+    if not user or user.role != 'user':
+        return redirect(url_for('login'))
+
+    event = Event.query.get_or_404(event_id)
+
+    if event.status != 'Open':
+        flash('This event is not open for booking.')
+        return redirect(url_for('user_dashboard'))
+    if event.available_slots &lt;= 0:
+        flash('No slots left on this event.')
+        return redirect(url_for('user_dashboard'))
+
+    already = Booking.query.filter_by(user_id=user.id, event_id=event.id, status='Booked').first()
+    if already:
+        flash('You have already booked this event.')
+        return redirect(url_for('user_dashboard'))
+
+    booking = Booking(user_id=user.id, event_id=event.id, booking_date=today())
+    event.available_slots -= 1
+    db.session.add(booking)
+    db.session.commit()
+    flash('Event booked!')
+    return redirect(url_for('user_dashboard'))</code></pre>
+<p>Be able to recite the three guards without looking:</p>
+<ol>
+<li><strong>Status guard</strong> — "allow booking only when event status is Open".</li>
+<li><strong>Slots guard</strong> — "prevent overbooking beyond available slots".</li>
+<li><strong>Duplicate guard</strong> — "prevent duplicate event bookings"; note it filters
+<code>status='Booked'</code>, so a user who cancelled CAN book again (deliberate — mention it before
+the proctor finds it).</li>
+</ol>
+<p>Then: create booking + decrement slot + one commit. Both changes land together — one
+transaction (a nice word to use out loud).</p>
+
+<h2>3. Backend vs frontend validation — free viva points</h2>
+<p>These guards are <strong>backend validation</strong> — they run in Flask, cannot be bypassed.
+The <code>required</code>, <code>type="number"</code>, <code>min="0"</code> attributes in your
+forms are <strong>frontend validation</strong> — instant feedback, but a crafted request skips
+them. "Which is more important?" — backend; frontend is convenience, backend is security. Your
+project has both.</p>
+
+<h2>4. Template</h2>
+<p>Write <code>user_dashboard.html</code>: filter form (GET) with a category dropdown that keeps
+its selection (<code>{{ 'selected' if category == level }}</code>), open-events table where each
+row's Book button is its own tiny POST form (disabled when slots are 0), and the bookings/history
+table with Cancel buttons (route comes in Build 6 — add it there if you build strictly in order).</p>
+<p>Restore the real <code>index()</code> redirects if you stubbed them in Build 2. Test: as a user,
+filter by category, book an event, book it again (blocked), have admin set slots to 1 and race two
+accounts for it, watch slots decrease on each booking.</p>
+
+<h2>5. Commit</h2>
+<pre><code>git add .
+git commit -m "Milestone-5 TMA-MAD-1 User dashboard and event booking system"
+git push</code></pre>
+
+<div class="pager">
+    <a href="17-build-4-staff.html">← Prev</a>
+    <a href="index.html">⌂ Home</a>
+    <a href="19-build-6-history.html">Next: Build 6 — History &amp; Status →</a>
+</div>
+</div>
+</body>
+</html>

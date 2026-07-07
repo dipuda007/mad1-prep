@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lesson 4: Python III</title>
+<link rel="icon" type="image/png" href="icon.png">
+<link rel="stylesheet" href="style.css">
+<script>(function(){var t=localStorage.getItem("mad1-theme");if(location.hash==="#force-dark")t="dark";if(location.hash==="#force-light")t="light";if(t==="dark"||(!t&&window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches))document.documentElement.setAttribute("data-theme","dark");})();</script>
+<script src="app.js" defer></script>
+</head>
+<body>
+<div class="topnav"><a href="index.html">🏔️ Home</a></div>
+<div class="wrap">
+
+<h1>Lesson 4: Python III — functions, imports, classes</h1>
+<p><strong>Goal:</strong> the last three Python ideas the project needs.</p>
+
+<h2>Functions — reusable blocks</h2>
+<pre><code>def greet(name):
+    return "Hello " + name
+
+message = greet("Ravi")
+print(message)            # Hello Ravi
+
+def slots_left(total, booked):
+    return total - booked
+
+print(slots_left(10, 4))  # 6</code></pre>
+<p>Every Flask route is just a function. <code>def login(): ...</code> — that's it.</p>
+
+<h2>Imports — using other people's code</h2>
+<pre><code>from datetime import datetime
+
+now = datetime.now()
+print(now.strftime('%Y-%m-%d'))    # e.g. 2026-07-07 — exactly how the app stamps bookings</code></pre>
+<pre><code># three shapes of import you'll see:
+import math                          # use as math.ceil(2.1)
+from flask import Flask, request     # pick specific names out of a package
+from models import db, User          # import from YOUR OWN file models.py</code></pre>
+
+<h2>Classes — blueprints for objects</h2>
+<p>A class describes what data a "thing" holds. Your database tables are classes.</p>
+<pre><code>class Event:
+    def __init__(self, name, slots):
+        self.name = name          # each event object carries its own name
+        self.slots = slots
+
+t1 = Event("Music Night", 10)          # t1 is an object (an "instance")
+t2 = Event("Kedarkantha", 5)
+print(t1.name, t2.slots)          # Music Night 5</code></pre>
+<p>In the real app you write <code>class Event(db.Model):</code> — the part in parentheses is
+<strong>inheritance</strong>: Event receives all abilities of SQLAlchemy's <code>db.Model</code>
+(saving to the database, querying) for free, and you only declare the columns.</p>
+
+<div class="viva">"What is <code>db.Model</code> and why is it in the brackets?" — it is the base
+class from Flask-SQLAlchemy. Writing <code>class Event(db.Model)</code> means Event
+<em>inherits</em> from it, which is what turns a plain Python class into a database table with
+query powers (<code>Event.query.all()</code> etc.). This exact question appears constantly in vivas.</div>
+
+<h2>Decorators — the @ thing</h2>
+<pre><code>@app.route('/login')
+def login():
+    ...</code></pre>
+<p>A decorator is a function that wraps another function to add behaviour without changing its
+code. <code>@app.route('/login')</code> tells Flask: "when a browser asks for /login, call this
+function". You don't need to write your own decorators — you only need to explain this one.</p>
+
+<div class="viva">"What is <code>if __name__ == '__main__':</code>?" — Python sets the special
+variable <code>__name__</code> to <code>'__main__'</code> only when the file is run directly
+(<code>python app.py</code>). If the file is imported by another file, the block is skipped. We use
+it so the server starts only when we run app.py itself.</div>
+
+<h2>Exceptions (bonus — sometimes asked)</h2>
+<pre><code>try:
+    days = int("abc")        # this crashes -> ValueError
+except ValueError:
+    print("Please enter a number")</code></pre>
+<p><code>try/except</code> catches errors so the app shows a message instead of crashing.</p>
+
+<h2>Try it</h2>
+<p>Write a class <code>Booking</code> with <code>__init__(self, user, event)</code>, create two
+bookings, loop over them in a list and print <em>"user → event"</em> for each.</p>
+
+<div class="pager">
+    <a href="03-python-2.html">← Prev</a>
+    <a href="index.html">⌂ Home</a>
+    <a href="05-html.html">Next: HTML →</a>
+</div>
+</div>
+</body>
+</html>

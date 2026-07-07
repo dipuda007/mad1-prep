@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lesson 11: SQL &amp; SQLite</title>
+<link rel="icon" type="image/png" href="icon.png">
+<link rel="stylesheet" href="style.css">
+<script>(function(){var t=localStorage.getItem("mad1-theme");if(location.hash==="#force-dark")t="dark";if(location.hash==="#force-light")t="light";if(t==="dark"||(!t&&window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches))document.documentElement.setAttribute("data-theme","dark");})();</script>
+<script src="app.js" defer></script>
+</head>
+<body>
+<div class="topnav"><a href="index.html">🏔️ Home</a></div>
+<div class="wrap">
+
+<h1>Lesson 11: SQL &amp; SQLite</h1>
+<p><strong>Goal:</strong> understand what the ORM will do for you — because proctors ask you to
+write raw SQL ("query for names starting with S") even when your app never does.</p>
+
+<h2>What is a relational database?</h2>
+<p>Data stored in <strong>tables</strong> (rows + typed columns) that reference each other.
+<strong>SQLite</strong> is a tiny relational database engine that lives in a single file
+(<code>eventhub.db</code>) — no server to install, which is why the course mandates it.
+<strong>SQL</strong> is the language for talking to it.</p>
+
+<div class="viva">"Why SQLite? SQLite vs MySQL?" — SQLite: serverless, zero-configuration, whole DB
+in one file, perfect for local single-user apps (and the only DB the project permits). MySQL: a
+separate server process, handles many concurrent users, needed for production scale.
+<br><br>"Structured vs unstructured data?" — structured: fixed rows/columns (SQL databases).
+Unstructured: no fixed schema — images, free text, documents (NoSQL like MongoDB stores
+semi-structured JSON).</div>
+
+<h2>Try SQL yourself (optional but 20 minutes well spent)</h2>
+<pre><code>python
+&gt;&gt;&gt; import sqlite3
+&gt;&gt;&gt; con = sqlite3.connect('play.db')
+&gt;&gt;&gt; cur = con.cursor()</code></pre>
+
+<h2>The commands (CRUD)</h2>
+<pre><code>-- CREATE TABLE: define structure
+CREATE TABLE event (
+    id INTEGER PRIMARY KEY,
+    name TEXT NOT NULL,
+    location TEXT,
+    slots INTEGER
+);
+
+-- C: INSERT (create rows)
+INSERT INTO event (name, location, slots) VALUES ('Music Night', 'Nepal', 10);
+
+-- R: SELECT (read)
+SELECT * FROM event;                          -- all rows, all columns
+SELECT name, slots FROM event;                -- some columns
+SELECT * FROM event WHERE slots &gt; 0;          -- filter
+SELECT * FROM event WHERE name LIKE 'S%';     -- names starting with S  (viva classic!)
+SELECT COUNT(*) FROM event;                   -- how many rows
+
+-- U: UPDATE (change)
+UPDATE event SET slots = 9 WHERE id = 1;      -- ALWAYS use WHERE or you update every row
+
+-- D: DELETE
+DELETE FROM event WHERE id = 1;</code></pre>
+<div class="viva">"What is CRUD?" — Create, Read, Update, Delete: the four basic operations on
+data. SQL: INSERT/SELECT/UPDATE/DELETE. HTTP: POST/GET/PUT/DELETE. Your admin does full CRUD on
+events.</div>
+
+<h2>Keys — the most important concept</h2>
+<table>
+<tr><th>Term</th><th>Meaning</th></tr>
+<tr><td><strong>Primary key</strong></td><td>column that uniquely identifies each row (your <code>id</code> columns); cannot be NULL, cannot repeat</td></tr>
+<tr><td><strong>Foreign key</strong></td><td>column holding another table's primary key, creating a relationship — <code>booking.event_id</code> points at <code>event.id</code></td></tr>
+<tr><td><strong>Unique</strong></td><td>values may not repeat but it's not the row identifier (your <code>username</code>)</td></tr>
+<tr><td><strong>NOT NULL</strong></td><td>value is compulsory (<code>nullable=False</code> in SQLAlchemy)</td></tr>
+</table>
+<div class="viva">"Primary vs unique key?" — both forbid duplicates, but a table has exactly ONE
+primary key which identifies rows and can't be NULL; it can have many unique columns and (in SQL
+generally) unique columns can allow NULL. "Primary vs foreign key?" — primary identifies rows in
+its own table; foreign references a primary key of another table to link them.</div>
+
+<h2>Relationships between tables</h2>
+<table>
+<tr><th>Type</th><th>Example in YOUR project</th><th>How</th></tr>
+<tr><td>One-to-one</td><td>User ↔ StaffProfile</td><td>FK + "only one profile per user"</td></tr>
+<tr><td>One-to-many</td><td>Event → Bookings; User → Bookings; Staff → Events</td><td>FK on the "many" side</td></tr>
+<tr><td>Many-to-many</td><td>(not needed here)</td><td>a third "association" table of FK pairs</td></tr>
+</table>
+<div class="viva">"How would you convert one-to-many into many-to-many?" — introduce a junction
+table holding two foreign keys (e.g. event_id + staff_id), one row per pairing; remove the single FK
+column.</div>
+
+<h2>Terms that get asked cold</h2>
+<ul>
+<li><strong>Constraint</strong> — a rule the DB enforces: PRIMARY KEY, FOREIGN KEY, UNIQUE, NOT NULL, DEFAULT, CHECK.</li>
+<li><strong>Normalization</strong> — organizing tables to avoid repeating data (e.g. we store <code>event_id</code> in a booking, not the event's whole name/location — those live once in the event table).</li>
+<li><strong>TRUNCATE vs DROP vs DELETE</strong> — DELETE removes rows (can filter with WHERE); TRUNCATE empties the whole table fast (SQLite doesn't have it; use DELETE without WHERE); DROP removes the table itself, structure and all.</li>
+<li><strong>NULL</strong> — "no value". Not 0, not empty string. <code>staff_id</code> is NULL until admin assigns someone.</li>
+<li><strong>Why can't I delete a user who has bookings?</strong> — the foreign key constraint: bookings still reference that user. Delete/handle the child rows first (your delete-event route does exactly this), or configure cascade.</li>
+</ul>
+
+<div class="pager">
+    <a href="10-forms.html">← Prev</a>
+    <a href="index.html">⌂ Home</a>
+    <a href="12-sqlalchemy.html">Next: Flask-SQLAlchemy →</a>
+</div>
+</div>
+</body>
+</html>

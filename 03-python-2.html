@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lesson 3: Python II</title>
+<link rel="icon" type="image/png" href="icon.png">
+<link rel="stylesheet" href="style.css">
+<script>(function(){var t=localStorage.getItem("mad1-theme");if(location.hash==="#force-dark")t="dark";if(location.hash==="#force-light")t="light";if(t==="dark"||(!t&&window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches))document.documentElement.setAttribute("data-theme","dark");})();</script>
+<script src="app.js" defer></script>
+</head>
+<body>
+<div class="topnav"><a href="index.html">🏔️ Home</a></div>
+<div class="wrap">
+
+<h1>Lesson 3: Python II — lists, dicts, if, loops</h1>
+<p><strong>Goal:</strong> the four structures your whole app is made of.</p>
+
+<h2>Lists — ordered collections</h2>
+<pre><code>events = ["Music Night", "Valley of Flowers", "Kedarkantha"]
+
+print(events[0])        # Music Night   (counting starts at 0!)
+print(len(events))      # 3
+events.append("Roopkund")   # add to the end
+print(events)</code></pre>
+<p>In your app, <code>Event.query.all()</code> gives you a <strong>list</strong> of event objects —
+that's why lists matter.</p>
+
+<div class="viva">"Difference between list and tuple?" — asked in almost every viva.
+A <strong>list</strong> <code>[1,2,3]</code> is <em>mutable</em> (can change: append, remove, reassign).
+A <strong>tuple</strong> <code>(1,2,3)</code> is <em>immutable</em> (cannot change after creation).
+Tuples are slightly faster and can be used as dictionary keys. "Mutable" = changeable in place.</div>
+
+<h2>Dictionaries — key → value pairs</h2>
+<pre><code>event = {"name": "Music Night", "slots": 10, "category": "Hard"}
+
+print(event["name"])       # Music Night
+event["slots"] = 9         # change a value
+event["location"] = "Nepal"   # add a new key</code></pre>
+<p>You use dicts in the app: <code>request.form['username']</code> works exactly like a dictionary,
+and the admin dashboard passes a <code>stats</code> dict to the template.</p>
+
+<h2>if / elif / else</h2>
+<pre><code>slots = 0
+
+if slots &lt;= 0:
+    print("No slots left")
+elif slots &lt; 3:
+    print("Filling fast!")
+else:
+    print("Plenty of space")</code></pre>
+<div class="warn"><strong>Indentation is grammar in Python.</strong> The 4 spaces before
+<code>print</code> tell Python it belongs to the <code>if</code>. Wrong indentation = error or wrong
+logic. VS Code indents for you when you type <code>:</code> and Enter.</div>
+
+<h2>for loops</h2>
+<pre><code>events = ["Music Night", "Valley of Flowers", "Kedarkantha"]
+
+for t in events:
+    print(f"Available: {t}")
+
+# loop over numbers
+for i in range(3):     # 0, 1, 2
+    print(i)</code></pre>
+<p>The same loop appears in Jinja templates as <code>{% for event in events %}</code> to build the
+event tables — one HTML row per event.</p>
+
+<h2>Combining them — mini booking logic</h2>
+<pre><code>bookings = []          # empty list
+event = {"name": "Music Night", "slots": 2, "status": "Open"}
+
+user = "ravi"
+if event["status"] != "Open":
+    print("Event not open")
+elif event["slots"] &lt;= 0:
+    print("No slots left")
+elif user in bookings:
+    print("Already booked")
+else:
+    bookings.append(user)
+    event["slots"] -= 1
+    print(f"Booked! {event['slots']} slots left")</code></pre>
+<p>Read that again — it IS your project's booking route, just without the database. If you
+understand this block, you understand the heart of the app.</p>
+
+<h2>Try it</h2>
+<p>Make a list of 3 event dicts (name + slots). Loop over them and print only the ones with
+slots &gt; 0.</p>
+
+<div class="pager">
+    <a href="02-python-1.html">← Prev</a>
+    <a href="index.html">⌂ Home</a>
+    <a href="04-python-3.html">Next: Python III →</a>
+</div>
+</div>
+</body>
+</html>
